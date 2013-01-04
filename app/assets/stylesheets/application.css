@@ -11,3 +11,21 @@
  *= require_self
  *= require_tree .
  */
+
+#region {
+	font-size: 56px;
+	float: right;
+	margin-right: 20px;
+}
+
+
+.results {
+	border: 1px dotted green;
+}
+
+.results ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	font-size: 26px;
+}

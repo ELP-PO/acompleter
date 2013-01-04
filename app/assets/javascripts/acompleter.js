@@ -66,7 +66,7 @@
 						acompleter.activate();
 						console.log('default', e.keyCode);
 			            break;            
-			    }
+			    } // switch
 			}); // $this.keydown
 		}); // this.each
 	} // fn.acompleter 
@@ -76,15 +76,17 @@
         url: '/kladr/list.json?query=',
         remoteDataType: 'json',
         loadingClass: 'loading',
+        resultsClass: 'results',
         onError: undefined,
 
-		lastitem: 'forcomma'
+		_dummy: 'just to be last item'
 	};
 		
 	var Acompleter = function($elem, options) {
 		var self = this;
 		
 		this.$elem = $elem;
+        this.$results = null;
 		this.options = options;
 		this.keyTimeout_ = null;
 
@@ -111,16 +113,11 @@
 			} else {
 				var self = this;
 				var ajaxCallback = function(data) {
-                    console.log(data);
-                    /*
-	                var parsed = false;
 	                if (data !== false) {
-	                    parsed = self.parseRemoteData(data);
-	                    self.cacheWrite(filter, parsed);
+	                    self.cacheWrite(value, data);
 	                }
-	                self.dom.$elem.removeClass(self.options.loadingClass);
-	                callback(parsed);
-                    */
+                    self.$elem.removeClass(self.options.loadingClass);
+                    self.processResults(value, data);
                 };
 
 				this.$elem.addClass(this.options.loadingClass);
@@ -143,13 +140,81 @@
             return this.options.url + value;
         }; // makeUrl
         
-		this.processResults = function(value, data) {
-			console.log('process results', value, data);
-		}; // processResults
+        this.processResults = function(value, data) {
+             // save processed value
+             // save loaded data
+             // call showResults
+             this.lastProcessedValue_ = value;
+             this.results = data;
+             if (data.length) {
+                 this.showResults();
+             } else {
+                 this.hideResults();
+             }
+        }; // processResults
 
+		this.showResults = function() {
+            if (!this.$results) {
+                this.createList();
+            } else {
+                this.rebuildList();
+            }
+            this.showList();
+		}; // showResults
+
+        this.hideResults = function() {
+            console.log('hideResults');
+        };
+
+        this.createList = function() {
+            this.$results = $('<div></div>').hide().addClass(options.resultsClass).css({ position: 'absolute' });
+
+            (function(self) {
+                var $ul = $('<ul></ul>');
+                for(var i=0; i < self.results.length; i++) {
+                    var item = self.createListItem(self.results[i]);
+                    $ul.append(item);
+                }
+                self.$results.append($ul);
+            })(this);
+
+            $('body').append(this.$results);
+        }; // createList
+        
+        this.createListItem = function(result) {
+            return $('<li></li>', {
+                text: result.name
+            });
+        }; // createListItem
+
+        this.rebuildList = function() {
+            console.log('rebuildList');
+        }; // rebuildList
+
+        this.showList = function() {
+            // Always recalculate position since window size or
+            // input element location may have changed.
+            var position = this.$elem.offset();
+            position.top += this.$elem.outerHeight();
+            position.minWidth = this.$elem.outerWidth() - (this.$results.outerWidth() - this.$results.width());
+
+            this.$results
+                .css(position)
+                .show();
+        }; // showList
+
+
+
+        
         this.cacheRead = function(value) {
             return false;
         }; // cacheRead
+
+        this.cacheWrite = function(value, data) {
+            return false;
+        }; // cacheWrite
+
+
 
 	}; // var Acompleter
 
