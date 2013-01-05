@@ -24,7 +24,6 @@
 			        case 40: // down arrow
 			        case 38: // up arrow
 						e.preventDefault();
-						console.log('up|down arrow');
 			            /*
 						if (!this.scroll_timeout) {
 			                this.scroll_timeout = setTimeout(function() {p.scroll_timeout = null;}, p.scroll_delay);
@@ -37,13 +36,11 @@
 
 			        // enter
 			        case 13:
-						console.log('enter');
 			            //return !this.selectHighlighted();
 			            break;
 
 			        // escape
 			        case 27:
-						console.log('escape');
 						// TODO: hide list
 		                //this.hideList();
 		                //return false;
@@ -58,13 +55,11 @@
 			        case 16: case 17: case 18:   // shift, ctrl, alt
 			        case 9: case 20:    // tab, capslock
 			        	// no reaction
-						console.log('no reaction');
 			            break;
 
 
 			        default:
 						acompleter.activate();
-						console.log('default', e.keyCode);
 			            break;            
 			    } // switch
 			}); // $this.keydown
@@ -78,144 +73,193 @@
         loadingClass: 'loading',
         resultsClass: 'results',
         onError: undefined,
+        listLength: 10, 
 
 		_dummy: 'just to be last item'
 	};
 		
+
+
 	var Acompleter = function($elem, options) {
 		var self = this;
 		
 		this.$elem = $elem;
         this.$results = null;
 		this.options = options;
+        this.current_ = { index: 0, serialized: null };
 		this.keyTimeout_ = null;
+    };
 
 
-		this.activate = function() {
-			if (this.keyTimeout_) {
-				clearTimeout(this.keyTimeout_);
-			}
-			this.keyTimeout_ = setTimeout(function() {
-				self.activateNow();
-			}, this.options.delay);
-		}; // this.activate
 
-		this.activateNow = function() {
-			// TODO: prepare value, check necessary to update
-			var value = this.$elem.val();
-			this.fetchData(value);
-		}; // this.activateNow
+    Acompleter.prototype.activate = function() {
+        if (this.keyTimeout_) {
+            clearTimeout(this.keyTimeout_);
+        }
+        var self = this;
+        this.keyTimeout_ = setTimeout(function() {
+            self.activateNow();
+        }, this.options.delay);
+    }; // this.activate
+
+
+    Acompleter.prototype.activateNow = function() {
+        // TODO: prepare value, check necessary to update
+        var value = this.$elem.val();
+        this.fetchData(value);
+    }; // this.activateNow
+
 		
-		this.fetchData = function(value) {
-			var data = this.cacheRead(value);
-			if (data) {
-				this.processResults(value, data);
-			} else {
-				var self = this;
-				var ajaxCallback = function(data) {
-	                if (data !== false) {
-	                    self.cacheWrite(value, data);
-	                }
-                    self.$elem.removeClass(self.options.loadingClass);
-                    self.processResults(value, data);
-                };
-
-				this.$elem.addClass(this.options.loadingClass);
-				$.ajax({
-					url: this.makeUrl(value),
-					success: ajaxCallback,
-					error: function(jqXHR, textStatus, errorThrown) {
-						if ($.isFunction(self.options.onError)) {
-							self.options.onError(jqXHR, textStatus, errorThrown);
-						} else {
-							ajaxCallback(false);
-						}
-					},
-					dataType: self.options.remoteDataType
-				});
-			}
-		}; // fetchData
-		
-        this.makeUrl = function(value) {
-            return this.options.url + value;
-        }; // makeUrl
-        
-        this.processResults = function(value, data) {
-             // save processed value
-             // save loaded data
-             // call showResults
-             this.lastProcessedValue_ = value;
-             this.results = data;
-             if (data.length) {
-                 this.showResults();
-             } else {
-                 this.hideResults();
-             }
-        }; // processResults
-
-		this.showResults = function() {
-            if (!this.$results) {
-                this.createList();
-            } else {
-                this.rebuildList();
-            }
-            this.showList();
-		}; // showResults
-
-        this.hideResults = function() {
-            console.log('hideResults');
-        };
-
-        this.createList = function() {
-            this.$results = $('<div></div>').hide().addClass(options.resultsClass).css({ position: 'absolute' });
-
-            (function(self) {
-                var $ul = $('<ul></ul>');
-                for(var i=0; i < self.results.length; i++) {
-                    var item = self.createListItem(self.results[i]);
-                    $ul.append(item);
+    Acompleter.prototype.fetchData = function(value) {
+        var data = this.cacheRead(value);
+        if (data) {
+            this.processResults(value, data);
+        } else {
+            var self = this;
+            var ajaxCallback = function(data) {
+                if (data.length) {
+                    self.cacheWrite(value, data);
                 }
-                self.$results.append($ul);
-            })(this);
+                self.$elem.removeClass(self.options.loadingClass);
+                self.processResults(value, data);
+            };
 
-            $('body').append(this.$results);
-        }; // createList
-        
-        this.createListItem = function(result) {
-            return $('<li></li>', {
-                text: result.name
+            this.$elem.addClass(this.options.loadingClass);
+            $.ajax({
+                url: this.makeUrl(value),
+                success: ajaxCallback,
+                error: function(jqXHR, textStatus, errorThrown) {
+                    if ($.isFunction(self.options.onError)) {
+                        self.options.onError(jqXHR, textStatus, errorThrown);
+                    } else {
+                        ajaxCallback(false);
+                    }
+                },
+                dataType: self.options.remoteDataType
             });
-        }; // createListItem
+        }
+    }; // fetchData
+		
 
-        this.rebuildList = function() {
-            console.log('rebuildList');
-        }; // rebuildList
+    Acompleter.prototype.makeUrl = function(value) {
+        return this.options.url + value;
+    }; // makeUrl
+        
 
-        this.showList = function() {
-            // Always recalculate position since window size or
-            // input element location may have changed.
-            var position = this.$elem.offset();
-            position.top += this.$elem.outerHeight();
-            position.minWidth = this.$elem.outerWidth() - (this.$results.outerWidth() - this.$results.width());
+    Acompleter.prototype.processResults = function(value, data) {
+            this.lastProcessedValue_ = value;
+            this.results = data;
+            this.updateCurrent();
+            if (data.length) {
+                this.showResults();
+            } else {
+                this.hideResults();
+            }
+    }; // processResults
 
-            this.$results
-                .css(position)
-                .show();
-        }; // showList
+
+    /**
+     * Update index of the current item in new results set 
+     * or set to first item if current item is not found in reulsts
+     */
+    Acompleter.prototype.updateCurrent = function() {
+        var index = 0,
+            self = this;
+        if (this.current_.serialized !== null) {
+            $.each(this.results, function(i, n) {
+                if (self.current_.serialized == $.param(n)) {
+                    index = i;
+                    return false;
+                }
+            });
+        }
+        this.setCurrent(index);
+    }; // updateCurrent
 
 
+    /**
+     * Remember item in results[index] as current item
+     */
+    Acompleter.prototype.setCurrent = function(index) {
+        this.current_.index = index;
+        this.current_.serialized = $.param(this.results[index]);
+    }; // setCurrent
+
+
+    Acompleter.prototype.showResults = function() {
+        if (!this.$results) {
+            this.createList();
+        } else {
+            this.rebuildList();
+        }
+        this.showList();
+    }; // showResults
+
+
+    Acompleter.prototype.hideResults = function() {
+        this.$results.hide();
+    };
+
+
+    Acompleter.prototype.createList = function() {
+        this.$results = $('<div></div>').hide().addClass(this.options.resultsClass).css({ position: 'absolute' });
+
+        // create items
+        //
+        (function(self) {
+            var $ul = $('<ul></ul>');
+            var min = Math.max(0, self.current_.index - self.options.listLength + 1);
+            var max = Math.min(min + self.options.listLength, self.results.length);
+            for(var i = min; i < max; i++) {
+                var item = self.createListItem(self.results[i]);
+                if (i == self.current_.index) {
+                    item.addClass('current');
+                }
+                $ul.append(item);
+            }
+            self.$results.append($ul);
+        })(this);
+
+        $('body').append(this.$results);
+    }; // createList
+        
+
+    Acompleter.prototype.createListItem = function(result) {
+        return $('<li></li>', {
+            text: result.name
+        });
+    }; // createListItem
+
+
+    Acompleter.prototype.rebuildList = function() {
+        this.$results.empty();
+        this.createList();
+    }; // rebuildList
+
+
+    Acompleter.prototype.showList = function() {
+        // Always recalculate position since window size or
+        // input element location may have changed.
+        var position = this.$elem.offset();
+        position.top += this.$elem.outerHeight();
+        position.minWidth = this.$elem.outerWidth() - (this.$results.outerWidth() - this.$results.width());
+
+        this.$results
+            .css(position)
+            .show();
+    }; // showList
 
         
-        this.cacheRead = function(value) {
-            return false;
-        }; // cacheRead
-
-        this.cacheWrite = function(value, data) {
-            return false;
-        }; // cacheWrite
+    Acompleter.prototype.cacheRead = function(value) {
+        return false;
+    }; // cacheRead
 
 
+    Acompleter.prototype.cacheWrite = function(value, data) {
+        return false;
+    }; // cacheWrite
 
-	}; // var Acompleter
+
+
 
 })(jQuery);

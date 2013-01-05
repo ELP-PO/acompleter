@@ -19,6 +19,11 @@
 }
 
 
+#region.loading {
+	background-image: url(/assets/spinner.gif);
+}
+
+
 .results {
 	border: 1px dotted green;
 }
@@ -28,4 +33,9 @@
 	padding: 0;
 	margin: 0;
 	font-size: 26px;
+}
+
+.results ul li.current {
+	background: #ccc;
+	
 }

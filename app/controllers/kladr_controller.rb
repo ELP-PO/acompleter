@@ -1,10 +1,10 @@
 class KladrController < ApplicationController
   def list
-    if params[:query].length > 0
-      @items = Kladr.where("code like '__00000000000' AND name like concat(?, '%')", params[:query])
-    else
-      @items = Kladr.limit(100)
-    end
+    #if params[:query].length > 0
+      @items = Kladr.where("code like '__00000000000' AND name like concat(?, '%')", params[:query]).order('name')
+    #else
+     # @items = Kladr.limit(100)
+    #end
     
     respond_to do |format|
       format.html # list.html.erb
