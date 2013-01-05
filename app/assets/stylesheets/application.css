@@ -37,5 +37,9 @@
 
 .results ul li.current {
 	background: #ccc;
-	
+}
+
+.results ul li span {
+	background: #ffc;
+	font-weight: bold;
 }

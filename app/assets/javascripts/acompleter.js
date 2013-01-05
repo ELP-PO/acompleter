@@ -74,6 +74,7 @@
         resultsClass: 'results',
         onError: undefined,
         listLength: 10, 
+        matchInside: true,
 
 		_dummy: 'just to be last item'
 	};
@@ -88,6 +89,7 @@
 		this.options = options;
         this.current_ = { index: 0, serialized: null };
 		this.keyTimeout_ = null;
+        this.lastProcessedValue_ = undefined;
     };
 
 
@@ -147,14 +149,15 @@
         
 
     Acompleter.prototype.processResults = function(value, data) {
-            this.lastProcessedValue_ = value;
-            this.results = data;
-            this.updateCurrent();
-            if (data.length) {
-                this.showResults();
-            } else {
-                this.hideResults();
-            }
+        console.debug('process results', "'" + value + "'", data.length);
+        this.lastProcessedValue_ = value;
+        this.results = data;
+        this.updateCurrent();
+        if (data.length) {
+            this.showResults();
+        } else {
+            this.hideResults();
+        }
     }; // processResults
 
 
@@ -225,8 +228,9 @@
         
 
     Acompleter.prototype.createListItem = function(result) {
+        var pattern = new RegExp((this.options.matchInside ? '' : '^') + this.lastProcessedValue_, 'i');
         return $('<li></li>', {
-            text: result.name
+            html: result.name.replace(pattern, "<span>$&</span>")
         });
     }; // createListItem
 

@@ -1,7 +1,7 @@
 class KladrController < ApplicationController
   def list
     #if params[:query].length > 0
-      @items = Kladr.where("code like '__00000000000' AND name like concat(?, '%')", params[:query]).order('name')
+      @items = Kladr.where("code like '__00000000000' AND name like concat('%', concat(?, '%'))", params[:query]).order('name')
     #else
      # @items = Kladr.limit(100)
     #end
