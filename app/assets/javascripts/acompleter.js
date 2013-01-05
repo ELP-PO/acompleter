@@ -24,6 +24,12 @@
 			        case 40: // down arrow
 			        case 38: // up arrow
 						e.preventDefault();
+                        if (e.keyCode == 40) {
+                            acompleter.focusNext();
+                        } else {
+                            acompleter.focusPrev();
+                        }
+
 			            /*
 						if (!this.scroll_timeout) {
 			                this.scroll_timeout = setTimeout(function() {p.scroll_timeout = null;}, p.scroll_delay);
@@ -31,7 +37,6 @@
 			                return true;
 			            }
 						*/
-						// TODO: wait for scroll delay and start scrolling
 			            break;
 
 			        // enter
@@ -72,6 +77,7 @@
         remoteDataType: 'json',
         loadingClass: 'loading',
         resultsClass: 'results',
+        currentClass: 'current',
         onError: undefined,
         listLength: 10, 
         matchInside: true,
@@ -216,7 +222,7 @@
             for(var i = min; i < max; i++) {
                 var item = self.createListItem(self.results[i]);
                 if (i == self.current_.index) {
-                    item.addClass('current');
+                    item.addClass(self.options.currentClass);
                 }
                 $ul.append(item);
             }
@@ -264,6 +270,27 @@
     }; // cacheWrite
 
 
+    Acompleter.prototype.focusNext = function() {
+        this.focusMove(+1);
+    }; // focusNext
+
+
+    Acompleter.prototype.focusPrev = function() {
+        this.focusMove(-1);
+    }; // focusPrev
+
+
+    Acompleter.prototype.focusMove = function(modifier) {
+//        var index = this.current_.index + modifier;
+//        this.focusRedraw(index);
+    }; // focusMove
+
+
+    Acompleter.prototype.focusRedraw = function(index) {
+//        this.current_.element.removeClass(this.options.currentClass);
+//        this.setCurrent(index);
+//        this.current_.element.addClass(this.options.currentClass);
+    }; // focusRedraw
 
 
 })(jQuery);
