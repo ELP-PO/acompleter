@@ -39,6 +39,17 @@
 	background: #ccc;
 }
 
+.results ul li._delete_mark {
+	color: red;
+}
+.results ul li._append_mark {
+	color: green;
+}
+.results ul li.same {
+	color: blue;
+}
+
+
 .results ul li span {
 	background: #ffc;
 	font-weight: bold;

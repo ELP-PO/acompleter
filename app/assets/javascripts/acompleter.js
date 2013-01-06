@@ -90,12 +90,16 @@
 	var Acompleter = function($elem, options) {
 		var self = this;
 		
-		this.$elem = $elem;
-        this.$results = null;
 		this.options = options;
         this.current_ = { index: 0, serialized: null };
 		this.keyTimeout_ = null;
         this.lastProcessedValue_ = undefined;
+		this.$elem = $elem;
+        this.$elem.bind('processed.acompleter', function() { self.updateCurrent(); });
+        this.$elem.bind('processed.acompleter', function() { self.updateResults(); });
+
+        this.$results = this.createList();
+        $('body').append(this.$results);
     };
 
 
@@ -158,12 +162,7 @@
         console.debug('process results', "'" + value + "'", data.length);
         this.lastProcessedValue_ = value;
         this.results = data;
-        this.updateCurrent();
-        if (data.length) {
-            this.showResults();
-        } else {
-            this.hideResults();
-        }
+        this.$elem.trigger('processed.acompleter');
     }; // processResults
 
 
@@ -172,8 +171,10 @@
      * or set to first item if current item is not found in reulsts
      */
     Acompleter.prototype.updateCurrent = function() {
-        var index = 0,
-            self = this;
+        if (this.results.length === 0) {
+            return;
+        }
+        var index = 0, self = this;
         if (this.current_.serialized !== null) {
             $.each(this.results, function(i, n) {
                 if (self.current_.serialized == $.param(n)) {
@@ -195,56 +196,119 @@
     }; // setCurrent
 
 
-    Acompleter.prototype.showResults = function() {
-        if (!this.$results) {
-            this.createList();
-        } else {
-            this.rebuildList();
+    Acompleter.prototype.updateResults = function() {
+        if (this.results.length === 0) {
+            this.hideResults();
+            return;
         }
-        this.showList();
-    }; // showResults
+        var $ul = this.$results.children('ul');
+        var min = Math.max(0, this.current_.index - this.options.listLength + 1); 
+        var max = Math.min(min+this.options.listLength, this.results.length);
+        var self = this;
 
+        $ul.find('li').removeClass('_delete_mark').removeClass('_append_mark');
+
+        // mark diehards
+        // 
+        var r_max = max;
+        var diehard = true;
+        var $items = this.$results.find('ul>li');
+        for (var i = $items.length; i--;) {
+            diehard = true;
+            var I = $items.eq(i).text();
+            for (var r = min; r < r_max; r++) {
+                var R = this.results[r].name;
+                if (R < I) { 
+                    continue;
+                }
+                diehard = R > I;
+                r_max = r;
+                break;
+            }
+            if (diehard) {
+                $items.eq(i).addClass('_delete_mark');
+            }
+        }
+
+        // prependions
+        //
+        $items = $items.filter(':not(._delete_mark)');
+        var r_min = min;
+        for (var i = 0; i < $items.length; i++) {
+            var I = $items.eq(i).text();
+            for (var r = r_min; r < max; r++) {
+                var R = this.results[r].name;
+                if (R < I) {
+                    var $item = this.createListItem(r);
+                    $item.addClass('_append_mark');
+                    $items.eq(i).before($item);
+                } else {
+                    if (R == I) {
+                        $item = this.createListItem(r);
+                        $items.eq(i).replaceWith($item);
+                    }
+                    r_min = r + 1;
+                    break;
+                }
+            }
+        }
+        // appendinos
+        //
+        min = min + $ul.find('li:not(._delete_mark)').length;
+        for (var i = min; i < max; i++) {
+            var $item = this.createListItem(i);
+            $item.addClass('_append_mark');
+            $ul.append($item);
+        }
+
+
+
+
+        $ul.find('._delete_mark').remove();
+        
+        console.log('current', this.current_.index, this.results[this.current_.index].name);
+        this.highlightCurrent();
+
+        this.showList();
+    }; // updateResults
+
+
+    Acompleter.prototype.highlightCurrent = function() {
+        var self = this;
+        this.$results.find('ul>li.' + this.currentClass).removeClass(this.currentClass);
+        this.$results.find('ul>li').filter(function() { return $(this).data('index') == self.current_.index; }).addClass(this.options.currentClass);
+    }; // highlightCurrent
+    
 
     Acompleter.prototype.hideResults = function() {
+        console.log('hide results');
         this.$results.hide();
-    };
+    }; // hideResults
 
 
     Acompleter.prototype.createList = function() {
-        this.$results = $('<div></div>').hide().addClass(this.options.resultsClass).css({ position: 'absolute' });
-
-        // create items
-        //
-        (function(self) {
-            var $ul = $('<ul></ul>');
-            var min = Math.max(0, self.current_.index - self.options.listLength + 1);
-            var max = Math.min(min + self.options.listLength, self.results.length);
-            for(var i = min; i < max; i++) {
-                var item = self.createListItem(self.results[i]);
-                if (i == self.current_.index) {
-                    item.addClass(self.options.currentClass);
-                }
-                $ul.append(item);
-            }
-            self.$results.append($ul);
-        })(this);
-
-        $('body').append(this.$results);
+        var $results = $('<div></div>').hide().addClass(this.options.resultsClass).css({ position: 'absolute' });
+        var $ul = $('<ul></ul>');
+        $results.append($ul);
+        return $results;
     }; // createList
         
 
-    Acompleter.prototype.createListItem = function(result) {
+    Acompleter.prototype.createListItem = function(index) {
+        var result = this.results[index];
         var pattern = new RegExp((this.options.matchInside ? '' : '^') + this.lastProcessedValue_, 'i');
-        return $('<li></li>', {
-            html: result.name.replace(pattern, "<span>$&</span>")
-        });
+        var $li = $('<li></li>')
+                .html(result.name.replace(pattern, "<span>$&</span>"))
+                .data('serialized', $.param(result))
+                .data('index', index);
+
+        /*
+        if (index == this.current_.index) {
+            $li.addClass(this.options.currentClass);
+        }
+        (*/
+        return $li;
     }; // createListItem
-
-
-    Acompleter.prototype.rebuildList = function() {
-        this.$results.empty();
-        this.createList();
-    }; // rebuildList
 
 
     Acompleter.prototype.showList = function() {
@@ -270,6 +334,11 @@
     }; // cacheWrite
 
 
+    Acompleter.prototype.updateScroll = function() {
+        this.scroll_ = Math.max(0, this.current_.index - this.options.listLength + 1);
+    }; // updateScroll
+
+
     Acompleter.prototype.focusNext = function() {
         this.focusMove(+1);
     }; // focusNext
@@ -281,15 +350,15 @@
 
 
     Acompleter.prototype.focusMove = function(modifier) {
-//        var index = this.current_.index + modifier;
-//        this.focusRedraw(index);
+        var index = this.current_.index + modifier;
+        this.focusRedraw(index);
     }; // focusMove
 
 
     Acompleter.prototype.focusRedraw = function(index) {
-//        this.current_.element.removeClass(this.options.currentClass);
-//        this.setCurrent(index);
-//        this.current_.element.addClass(this.options.currentClass);
+        this.current_.element.removeClass(this.options.currentClass);
+        this.setCurrent(index);
+        this.current_.element.addClass(this.options.currentClass);
     }; // focusRedraw
 
 
