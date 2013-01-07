@@ -196,80 +196,96 @@
     }; // setCurrent
 
 
+    /**
+     * Smart replace dom-list items by results items
+     **/
     Acompleter.prototype.updateResults = function() {
         if (this.results.length === 0) {
             this.hideResults();
             return;
         }
-        var $ul = this.$results.children('ul');
-        var min = Math.max(0, this.current_.index - this.options.listLength + 1); 
-        var max = Math.min(min+this.options.listLength, this.results.length);
-        var self = this;
 
-        $ul.find('li').removeClass('_delete_mark').removeClass('_append_mark');
+        var self = this,
+            $ul = this.$results.children('ul'),
+            $items = $ul.children('li'),
+            scrollBottom = Math.max( 0, this.current_.index - this.options.listLength + 1 ),
+            scrollTop = Math.min( scrollBottom + this.options.listLength, this.results.length ),
+            removeMarkClass = '_remove_mark_acompleter',
+            appendMarkClass = '_append_mark_acompleter',
+            dum;
 
-        // mark diehards
-        // 
-        var r_max = max;
-        var diehard = true;
-        var $items = this.$results.find('ul>li');
-        for (var i = $items.length; i--;) {
-            diehard = true;
-            var I = $items.eq(i).text();
-            for (var r = min; r < r_max; r++) {
-                var R = this.results[r].name;
-                if (R < I) { 
-                    continue;
-                }
-                diehard = R > I;
-                r_max = r;
-                break;
-            }
-            if (diehard) {
-                $items.eq(i).addClass('_delete_mark');
-            }
-        }
+        // DEBUG: remove this string after debugging
+        $items.removeClass(removeMarkClass).removeClass(appendMarkClass);
 
-        // prependions
+        // Mark items that should be removed
         //
-        $items = $items.filter(':not(._delete_mark)');
-        var r_min = min;
-        for (var i = 0; i < $items.length; i++) {
-            var I = $items.eq(i).text();
-            for (var r = r_min; r < max; r++) {
-                var R = this.results[r].name;
-                if (R < I) {
-                    var $item = this.createListItem(r);
-                    $item.addClass('_append_mark');
-                    $items.eq(i).before($item);
-                } else {
-                    if (R == I) {
-                        $item = this.createListItem(r);
-                        $items.eq(i).replaceWith($item);
+        (function() {
+            var i, r, remove, itemString, resultString,
+                max = scrollTop;
+            for (i = $items.length; i--;) {
+                itemString = $items.eq(i).text();
+                remove = true;
+                // Search itemString inside results
+                for (r = scrollBottom; r < max; r++) {
+                    resultString = self.results[r].name;
+                    if (resultString >= itemString) {
+                        remove = resultString > itemString;
+                        max = r;
+                        break;
                     }
-                    r_min = r + 1;
-                    break;
+                }
+                // If itemString is not found mark it to be removed
+                if (remove) {
+                    $items.eq(i).addClass(removeMarkClass);
                 }
             }
-        }
-        // appendinos
+        })();
+
+        // Prepend new items before and between existing items
         //
-        min = min + $ul.find('li:not(._delete_mark)').length;
-        for (var i = min; i < max; i++) {
-            var $item = this.createListItem(i);
-            $item.addClass('_append_mark');
-            $ul.append($item);
+        (function() {
+            var i, r, itemString, resultString, 
+                $item, $restItems = $items.filter(":not(." + removeMarkClass + ")"),
+                min = scrollBottom;
+            for (i = 0; i < $restItems.length; i++) {
+                itemString = $restItems.eq(i).text();
+                for (r = min; r < scrollTop; r++) {
+                    resultString = self.results[r].name;
+                    if (resultString < itemString) {
+                        $item = self.createListItem(r);
+                        $item.addClass(appendMarkClass);
+                        $restItems.eq(i).before($item);
+                    } else {
+                        // Recreate existing items for sake of update highlighted value and
+                        // index of corresponding data in the results array
+                        if (resultString == itemString) {
+                            $item = self.createListItem(r);
+                            $restItems.eq(i).replaceWith($item);
+                        }
+                        min = r + 1;
+                        break;
+                    }
+                }
+            }
+        })();
+
+        // Append rest of the items to populate list
+        //
+        (function() {
+            var i, $item;
+            for (i = scrollBottom + $ul.find("li:not(." + removeMarkClass + ")").length; i < scrollTop; i++) {
+                $item = self.createListItem(i);
+                $item.addClass(appendMarkClass);
+                $ul.append($item);
+            }
+        })();
+
+        if (this.options.animation) {
+        } else {
+            $ul.find("." + removeMarkClass).remove();
+            this.highlightCurrent();
+            this.showList();
         }
-
-
-
-
-        $ul.find('._delete_mark').remove();
-        
-        console.log('current', this.current_.index, this.results[this.current_.index].name);
-        this.highlightCurrent();
-
-        this.showList();
     }; // updateResults
 
 

@@ -39,10 +39,10 @@
 	background: #ccc;
 }
 
-.results ul li._delete_mark {
+.results ul li._remove_mark_acompleter {
 	color: red;
 }
-.results ul li._append_mark {
+.results ul li._append_mark_acompleter {
 	color: green;
 }
 .results ul li.same {
