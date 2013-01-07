@@ -29,14 +29,6 @@
                         } else {
                             acompleter.focusPrev();
                         }
-
-			            /*
-						if (!this.scroll_timeout) {
-			                this.scroll_timeout = setTimeout(function() {p.scroll_timeout = null;}, p.scroll_delay);
-			                this.moveHighlight( key == 40 ? 1 : -1 );
-			                return true;
-			            }
-						*/
 			            break;
 
 			        // enter
@@ -84,7 +76,6 @@
 
 		_dummy: 'just to be last item'
 	};
-		
 
 
 	var Acompleter = function($elem, options) {
@@ -92,7 +83,6 @@
 		
 		this.options = options;
         this.current_ = { index: 0, serialized: null };
-        this.scroll_ = 0;
 		this.keyTimeout_ = null;
         this.lastProcessedValue_ = undefined;
 		this.$elem = $elem;
@@ -102,7 +92,6 @@
         this.$results = this.createList();
         $('body').append(this.$results);
     };
-
 
 
     Acompleter.prototype.activate = function() {
@@ -160,7 +149,6 @@
         
 
     Acompleter.prototype.processResults = function(value, data) {
-        console.debug('process results', "'" + value + "'", data.length);
         this.lastProcessedValue_ = value;
         this.results = data;
         this.$elem.trigger('processed.acompleter');
@@ -172,19 +160,23 @@
      * or set to first item if current item is not found in reulsts
      */
     Acompleter.prototype.updateCurrent = function() {
+        console.log('updateCurrent start');
         if (this.results.length === 0) {
             return;
         }
-        var index = 0, self = this;
+        var index = 0, currentString;
         if (this.current_.serialized !== null) {
-            $.each(this.results, function(i, n) {
-                if (self.current_.serialized == $.param(n)) {
+            currentString = this.$results.find('.current').text();
+            for (var i = this.results.length; i--;) {
+                if (currentString >= this.results[i].name) {
                     index = i;
-                    return false;
+                    break;
                 }
-            });
+            }
         }
+
         this.setCurrent(index);
+        console.log('updateCurrent end');
     }; // updateCurrent
 
 
@@ -192,16 +184,10 @@
      * Remember item in results[index] as current item
      */
     Acompleter.prototype.setCurrent = function(index) {
+        console.log('setCurrent start');
         this.current_.index = index;
         this.current_.serialized = $.param(this.results[index]);
-
-        // Update list scrolling position
-        //
-        if (index < this.scroll_) {
-            this.scroll_ = index;
-        } else if (index > this.scroll_ + this.options.listLength - 1) {
-            this.scroll_ = index - this.options.listLength + 1;
-        }
+        console.log('setCurrent end');
     }; // setCurrent
 
 
@@ -209,6 +195,7 @@
      * Smart replace dom-list items by results items
      **/
     Acompleter.prototype.updateResults = function() {
+        console.log('updateResults start');
         if (this.results.length === 0) {
             this.hideResults();
             return;
@@ -216,7 +203,7 @@
         var self = this,
             $ul = this.$results.children('ul'),
             $items = $ul.children('li'),
-            scrollTop = this.scroll_,
+            scrollTop = Math.max( 0, this.current_.index - this.options.listLength + 1 ),
             scrollBottom = Math.min( scrollTop + this.options.listLength, this.results.length ),
             removeMarkClass = '_remove_mark_acompleter',
             appendMarkClass = '_append_mark_acompleter';
@@ -290,18 +277,27 @@
             this.highlightCurrent();
             this.showList();
         }
+        console.log('updateResults end');
     }; // updateResults
 
 
     Acompleter.prototype.highlightCurrent = function() {
-        var self = this;
-        this.$results.find('ul>li.' + this.currentClass).removeClass(this.currentClass);
-        this.$results.find('ul>li').filter(function() { return $(this).data('index') == self.current_.index; }).addClass(this.options.currentClass);
+        console.log('highlightCurrent start');
+        var index = this.current_.index,
+            currentClass = this.options.currentClass;
+        this.$results.find('ul>li').each(function() {
+            var $this = $(this);
+            if ($this.data('index') == index) {
+                $this.addClass(currentClass);
+            } else {
+                $this.removeClass(currentClass);
+            }
+        });
+        console.log('highlightCurrent end');
     }; // highlightCurrent
     
 
     Acompleter.prototype.hideResults = function() {
-        console.log('hide results');
         this.$results.hide();
     }; // hideResults
 
@@ -321,12 +317,6 @@
                 .html(result.name.replace(pattern, "<span>$&</span>"))
                 .data('serialized', $.param(result))
                 .data('index', index);
-
-        /*
-        if (index == this.current_.index) {
-            $li.addClass(this.options.currentClass);
-        }
-        (*/
         return $li;
     }; // createListItem
 
@@ -354,9 +344,6 @@
     }; // cacheWrite
 
 
-    Acompleter.prototype.updateScroll = function() {
-        this.scroll_ = Math.max(0, this.current_.index - this.options.listLength + 1);
-    }; // updateScroll
 
 
     Acompleter.prototype.focusNext = function() {
@@ -369,7 +356,9 @@
     }; // focusPrev
 
 
+
     Acompleter.prototype.focusMove = function(modifier) {
+        console.log('focusMove start');
         var currentClass = this.options.currentClass,
             currentOutside = true,
             index = Math.max(0, Math.min(this.results.length - 1, this.current_.index + modifier));
@@ -387,10 +376,17 @@
         });
         // Redraw results with new scroll position
         if (currentOutside) {
-            this.updateResults();
+            this.scrollList(modifier);
         }
+        console.log('focusMove end');
     }; // focusMove
 
+    Acompleter.prototype.scrollList = function(modifier) {
+        var $newItem = this.createListItem(this.current_.index).addClass(this.options.currentClass);
+        this.$results
+            .find('ul')[modifier == 1 ? 'append' : 'prepend']($newItem)
+            .children('li:' + (modifier == 1 ? 'first' : 'last')).remove();
+    }; // scrollList
 
     Acompleter.prototype.focusRedraw = function(index) {
     }; // focusRedraw
