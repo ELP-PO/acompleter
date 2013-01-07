@@ -92,6 +92,7 @@
 		
 		this.options = options;
         this.current_ = { index: 0, serialized: null };
+        this.scroll_ = 0;
 		this.keyTimeout_ = null;
         this.lastProcessedValue_ = undefined;
 		this.$elem = $elem;
@@ -193,6 +194,14 @@
     Acompleter.prototype.setCurrent = function(index) {
         this.current_.index = index;
         this.current_.serialized = $.param(this.results[index]);
+
+        // Update list scrolling position
+        //
+        if (index < this.scroll_) {
+            this.scroll_ = index;
+        } else if (index > this.scroll_ + this.options.listLength - 1) {
+            this.scroll_ = index - this.options.listLength + 1;
+        }
     }; // setCurrent
 
 
@@ -204,29 +213,24 @@
             this.hideResults();
             return;
         }
-
         var self = this,
             $ul = this.$results.children('ul'),
             $items = $ul.children('li'),
-            scrollBottom = Math.max( 0, this.current_.index - this.options.listLength + 1 ),
-            scrollTop = Math.min( scrollBottom + this.options.listLength, this.results.length ),
+            scrollTop = this.scroll_,
+            scrollBottom = Math.min( scrollTop + this.options.listLength, this.results.length ),
             removeMarkClass = '_remove_mark_acompleter',
-            appendMarkClass = '_append_mark_acompleter',
-            dum;
+            appendMarkClass = '_append_mark_acompleter';
 
-        // DEBUG: remove this string after debugging
-        $items.removeClass(removeMarkClass).removeClass(appendMarkClass);
-
-        // Mark items that should be removed
+        // Mark items that  be removed
         //
         (function() {
             var i, r, remove, itemString, resultString,
-                max = scrollTop;
+                max = scrollBottom;
             for (i = $items.length; i--;) {
                 itemString = $items.eq(i).text();
                 remove = true;
                 // Search itemString inside results
-                for (r = scrollBottom; r < max; r++) {
+                for (r = scrollTop; r < max; r++) {
                     resultString = self.results[r].name;
                     if (resultString >= itemString) {
                         remove = resultString > itemString;
@@ -246,10 +250,10 @@
         (function() {
             var i, r, itemString, resultString, 
                 $item, $restItems = $items.filter(":not(." + removeMarkClass + ")"),
-                min = scrollBottom;
+                min = scrollTop;
             for (i = 0; i < $restItems.length; i++) {
                 itemString = $restItems.eq(i).text();
-                for (r = min; r < scrollTop; r++) {
+                for (r = min; r < scrollBottom; r++) {
                     resultString = self.results[r].name;
                     if (resultString < itemString) {
                         $item = self.createListItem(r);
@@ -273,7 +277,7 @@
         //
         (function() {
             var i, $item;
-            for (i = scrollBottom + $ul.find("li:not(." + removeMarkClass + ")").length; i < scrollTop; i++) {
+            for (i = scrollTop + $ul.find("li:not(." + removeMarkClass + ")").length; i < scrollBottom; i++) {
                 $item = self.createListItem(i);
                 $item.addClass(appendMarkClass);
                 $ul.append($item);
@@ -366,15 +370,29 @@
 
 
     Acompleter.prototype.focusMove = function(modifier) {
-        var index = this.current_.index + modifier;
-        this.focusRedraw(index);
+        var currentClass = this.options.currentClass,
+            currentOutside = true,
+            index = Math.max(0, Math.min(this.results.length - 1, this.current_.index + modifier));
+
+        this.setCurrent(index);
+
+        this.$results.find('ul>li').each(function() {
+            var $this = $(this);
+            if ($this.data('index') == index) {
+                $this.addClass(currentClass);
+                currentOutside = false;
+            } else {
+                $this.removeClass(currentClass);
+            }
+        });
+        // Redraw results with new scroll position
+        if (currentOutside) {
+            this.updateResults();
+        }
     }; // focusMove
 
 
     Acompleter.prototype.focusRedraw = function(index) {
-        this.current_.element.removeClass(this.options.currentClass);
-        this.setCurrent(index);
-        this.current_.element.addClass(this.options.currentClass);
     }; // focusRedraw
 
 
