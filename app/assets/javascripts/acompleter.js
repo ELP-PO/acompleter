@@ -17,6 +17,12 @@
             listLength: 10,
             matchInside: true,
 
+            getValue: function( result ) { return result; },
+            /**
+            * Returns value by which the plugin will compares result items with each other
+            */
+            getComparableValue: function( result ) { return result; },
+
             _dummy: "just to be last item"
         };
 
@@ -47,6 +53,8 @@
 
 
 
+
+
     $.Acompleter = function( $elem, options ) {
         /**
          * Assert parameters
@@ -60,7 +68,7 @@
         //this._defaults = defaults;
         //this._name = pluginName;
 
-        this._current = { index: 0, serialized: null };
+        this._current = { index: 0, valueToCompare: null };
         this._keyTimeout = null;
         this._lastProcessedValue = undefined;
         this.$elem = $elem;
@@ -181,10 +189,10 @@
         }
         var i, currentString,
             index = 0;
-        if ( this._current.serialized !== null ) {
-            currentString = this.$results.find(".current").text();
+        if ( this._current.valueToCompare !== null ) {
+            currentValue = this.$results.find(".current").data('valueToCompare');
             for ( i = this.results.length; i--; i ) {
-                if ( currentString >= this.results[ i ].name ) {
+                if ( currentValue >= this.results[ i ].name ) {
                     index = i;
                     break;
                 }
@@ -202,7 +210,7 @@
     $.Acompleter.prototype.setCurrent = function( index ) {
         console.log("setCurrent start");
         this._current.index = index;
-        this._current.serialized = $.param( this.results[ index ] );
+        this._current.valueToCompare = this.options.getComparableValue( this.results[ index ] );// $.param( this.results[ index ] );
         console.log("setCurrent end");
     }; // setCurrent
 
@@ -330,10 +338,15 @@
 
     $.Acompleter.prototype.createListItem = function( index ) {
         var result = this.results[ index ],
-            pattern = new RegExp( (this.options.matchInside ? "" : "^") + this._lastProcessedValue, "i" );
+            pattern = new RegExp(
+                ( this.options.matchInside ? "" : "^" ) + this._lastProcessedValue,
+                "i"
+            );
+        // TODO: figure out what to do when `getValue` appends text
+        //       which trigger math against `_lastProcessedValue`
         return $("<li></li>")
-            .html( result.name.replace( pattern, "<span>$&</span>" ) )
-            .data( "serialized", $.param(result) )
+            .html( this.options.getValue(result).replace( pattern, "<span>$&</span>" ) )
+            .data( "valueToCompare", this.options.getComparableValue(result) )
             .data( "index", index );
     }; // createListItem
 
@@ -409,9 +422,8 @@
 
     $.fn[ pluginName ] = function( options ) {
         return this.each(function () {
-            var $this = $(this);
-            if ( !$this.data( 'plugin_' + pluginName ) ) {
-                $this.data( 'plugin_' + pluginName, new $.Acompleter($this, options) );
+            if ( !$.data( this, 'plugin_' + pluginName ) ) {
+                $.data( this, 'plugin_' + pluginName, new $.Acompleter($(this), options) );
             }
         });
     };
