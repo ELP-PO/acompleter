@@ -210,7 +210,7 @@
     $.Acompleter.prototype.setCurrent = function( index ) {
         console.log("setCurrent start");
         this._current.index = index;
-        this._current.valueToCompare = this.options.getComparableValue( this.results[ index ] );// $.param( this.results[ index ] );
+        this._current.valueToCompare = this.options.getComparableValue( this.results[ index ] );
         console.log("setCurrent end");
     }; // setCurrent
 
