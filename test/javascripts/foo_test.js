@@ -1,21 +1,36 @@
-test('Foo is always says the truth', function() {
-	foo = { truth: true };
-	equal( foo.truth, true, 'foo.truth is not true' );
+module( "Setup", {
+	setup: function() {
+		this.$el = $( "#test-input" );
+	}
 });
 
-test('jQuery is defined', function() {
-	ok( window['jQuery'] !== undefined, 'global variable jquery is undefined' );
-});
+test( "acompleter plugin is created", function() {
+	strictEqual( this.$el.data("plugin_acompleter"), undefined );
 
-test('jQuery.Acompleter is defined', function() {
-	ok( window.jQuery.Acompleter !== undefined, 'global variable jquery is undefined' );
-});
-
-test('acompleter plugin is created', function() {
-	var $fixture = $( "#qunit-fixture" );
-
-	$fixture.append( "<input type='text'>" );
-	$( "input", $fixture ).acompleter();
+	this.$el.acompleter();
 	
-	ok( $( "input", $fixture ).data("plugin_acompleter") instanceof $.Acompleter, "plugin initialized successfully!" );
+	ok( this.$el.data("plugin_acompleter") instanceof $.Acompleter, "plugin initialized successfully!" );
+});
+
+test( "acompleter plugin is chained", function() {
+	deepEqual( this.$el.acompleter(), this.$el, "plugin is chained" );
+});
+
+test( "acompleter plugin is chained when multiple inputs", function() {
+	$( "#qunit-fixture" ).append( "<input>" );
+	$elements = $( "#qunit-fixture input" );
+	deepEqual( $elements.acompleter(), $elements, "plugin is chained multiple" );
+});
+
+
+module("Acompleter", {
+	setup: function() {
+		this.$el = $( "#test-input" ).acompleter();
+	}
+});
+
+test( "Load local data", function() {
+	this.$el.data('plugin_acompleter').options.data = [ "Acompleter", "Belsky", "Bububu", "Danver", "Dino", "Nino", "Zoo" ];
+	// events stuff
+	
 });

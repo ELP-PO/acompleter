@@ -15,6 +15,7 @@
             currentClass: "current",
             onError: undefined,
             listLength: 10,
+            minChars: 0,
             matchInside: true,
 
             getValue: function( result ) { return result; },
@@ -139,6 +140,18 @@
 
 
     $.Acompleter.prototype.fetchData = function( value ) {
+        // ?? this._lastProcessedValue = value;
+        if ( value.length < this.options.minChars ) {
+            this.processResults( value, [] );
+        } else if ( this.options.data ) {
+            this.processResults( value, this.options.data );
+        } else {
+            this.fetchRemoteData( value );
+        }
+    }; // fetchData
+
+    
+    $.Acompleter.prototype.fetchRemoteData = function( value ) {
         var data = this.cacheRead( value );
         if ( data ) {
             this.processResults( value, data );
@@ -166,7 +179,7 @@
                 dataType: self.options.remoteDataType
             });
         }
-    }; // fetchData
+    }; // fetchRemoteData
 
 
     $.Acompleter.prototype.processResults = function( value, data ) {
