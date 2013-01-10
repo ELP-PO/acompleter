@@ -12,6 +12,7 @@
             remoteDataType: "json",
             loadingClass: "loading",
             resultsClass: "results",
+            resultsId: "acompleter-results",
             currentClass: "current",
             onError: undefined,
             listLength: 10,
@@ -53,9 +54,6 @@
     };
 
 
-
-
-
     $.Acompleter = function( $elem, options ) {
         /**
          * Assert parameters
@@ -64,7 +62,7 @@
             throw new Error('Invalid parameter for jquery.Acompleter, jQuery object with one element with INPUT tag expected.');
         }
 
-        this.options = $.extend( {}, defaults, options);
+        this.options = $.extend( {}, defaults, options );
         // from boilerplate, but don't know for what
         //this._defaults = defaults;
         //this._name = pluginName;
@@ -72,15 +70,19 @@
         this._current = { index: 0, valueToCompare: null };
         this._keyTimeout = null;
         this._lastProcessedValue = undefined;
+        this.results = [];
         this.$elem = $elem;
+        this.$results = this.createList();
+        $("body").append( this.$results );
 
         this.init();
     };
 
+    // now used only in qunit
+    $.Acompleter._defaults = defaults;
+
     $.Acompleter.prototype.init = function() {
         var self = this;
-
-        $("body").append( this.$results = this.createList() );
 
         this.$elem.bind( "processed.acompleter", function() { self.updateCurrent(); } );
         this.$elem.bind( "processed.acompleter", function() { self.updateResults(); } );
@@ -98,7 +100,6 @@
                     //return !this.selectHighlighted();
                     break;
                 case 27: // escape
-                    // TODO: hide list
                     //this.hideList();
                     //return false;
                     break;
@@ -110,9 +111,7 @@
                 case 91: case 93:            // left command, right command
                 case 16: case 17: case 18:   // shift, ctrl, alt
                 case 9: case 20:    // tab, capslock
-                    // no reaction
                     break;
-
 
                 default:
                     self.activate();
@@ -341,11 +340,15 @@
 
 
     $.Acompleter.prototype.createList = function() {
-        return $("<div></div>")
-            .hide()
-            .addClass( this.options.resultsClass )
-            .css( { position: "absolute" } )
-            .append( $("<ul></ul>") );
+        var $results = $( "#" + this.options.resultsId );
+        if ( !$results.length ) {
+            $results = $( "<div></div>", { id: this.options.resultsId } )
+                .hide()
+                .addClass( this.options.resultsClass )
+                .css( { position: "absolute" } )
+                .append( $("<ul></ul>") );
+        }
+        return $results;
     }; // createList
 
 
