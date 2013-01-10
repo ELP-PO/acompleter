@@ -67,6 +67,7 @@
         //this._defaults = defaults;
         //this._name = pluginName;
 
+        this._active = false;
         this._current = { index: 0, valueToCompare: null };
         this._keyTimeout = null;
         this._lastProcessedValue = undefined;
@@ -85,17 +86,26 @@
         var self = this;
 
         this.$elem.bind( "processed.acompleter", function() { self.updateCurrent(); } );
-        this.$elem.bind( "processed.acompleter", function() { self.updateResults(); } );
+        this.$elem.bind( "processed.acompleter", function() { self.showResults(); } );
         this.$elem.bind( "keydown.acompleter", function( e ) {
-            switch ( e.keyCode ) {
+            //console.log( 'keykode:' , e.keyCode );
+            switch ( parseInt(e.keyCode) ) {
                 case 40: // down arrow
                     e.preventDefault();
-                    self.focusNext();
-                    break;
+                    if (self._active) {
+                        self.focusNext();
+                    } else {
+                        self.activate();
+                    }
+                    return false;
                 case 38: // up arrow
                     e.preventDefault();
-                    self.focusPrev();
-                    break;
+                    if (self._active) {
+                        self.focusPrev();
+                    } else {
+                        self.activate();
+                    }
+                    return false;
                 case 13: // return
                     //return !this.selectHighlighted();
                     break;
@@ -107,15 +117,14 @@
                  * Ignore navigational and special keys
                  */
                 case 37: case 39: case 34: case 33:  // left, right arrows, pg up, pg down
-                case 35: case 36:    // home, end
+                case 35: case 36:            // home, end
                 case 91: case 93:            // left command, right command
                 case 16: case 17: case 18:   // shift, ctrl, alt
-                case 9: case 20:    // tab, capslock
+                case 9:  case 20: case 45:   // tab, capslock, insert
                     break;
 
                 default:
                     self.activate();
-                    break;
             } // switch
         }); // $this.keydown
     }; // init
@@ -195,7 +204,7 @@
      * or set to first item if current item is not found in reulsts
      */
     $.Acompleter.prototype.updateCurrent = function() {
-        console.log("updateCurrent start");
+        //console.log("updateCurrent start");
         if ( this.results.length === 0 ) {
             return;
         }
@@ -212,7 +221,7 @@
         }
 
         this.setCurrent( index );
-        console.log("updateCurrent end");
+        //console.log("updateCurrent end");
     }; // updateCurrent
 
 
@@ -220,20 +229,21 @@
      * Remember item in results[index] as current item
      */
     $.Acompleter.prototype.setCurrent = function( index ) {
-        console.log("setCurrent start");
+        //console.log("setCurrent start");
         this._current.index = index;
         this._current.valueToCompare = this.options.getComparableValue( this.results[ index ] );
-        console.log("setCurrent end");
+        //console.log("setCurrent end");
     }; // setCurrent
 
 
     /**
      * Smart replace dom-list items by results items
      **/
-    $.Acompleter.prototype.updateResults = function() {
-        console.log("updateResults start");
+    $.Acompleter.prototype.showResults = function() {
+        //console.log("showResults start");
         if ( this.results.length === 0 ) {
             this.hideResults();
+            this._active = false;
             return;
         }
         var self = this,
@@ -314,12 +324,13 @@
             this.highlightCurrent();
             this.showList();
         }
-        console.log("updateResults end");
-    }; // updateResults
+        this._active = true;
+        //console.log("showResults end");
+    }; // showResults
 
 
     $.Acompleter.prototype.highlightCurrent = function() {
-        console.log("highlightCurrent start");
+        //console.log("highlightCurrent start");
         var index = this._current.index,
             currentClass = this.options.currentClass;
         this.$results.find("ul>li").each(function() {
@@ -330,7 +341,7 @@
                 $this.removeClass( currentClass );
             }
         });
-        console.log("highlightCurrent end");
+        //console.log("highlightCurrent end");
     }; // highlightCurrent
 
 
@@ -404,7 +415,10 @@
 
 
     $.Acompleter.prototype.focusMove = function( modifier ) {
-        console.log("focusMove start");
+        //console.log("focusMove start");
+        if ( !this.results.length ) {
+            return;
+        }
         var currentClass = this.options.currentClass,
             currentOutside = true,
             index = Math.max( 0, Math.min(this.results.length - 1, this._current.index + modifier) );
@@ -424,7 +438,7 @@
         if ( currentOutside ) {
             this.scrollList( modifier );
         }
-        console.log("focusMove end");
+        //console.log("focusMove end");
     }; // focusMove
 
     $.Acompleter.prototype.scrollList = function( modifier ) {
