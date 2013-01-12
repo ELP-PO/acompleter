@@ -32,7 +32,7 @@ test( "Plugin is destroyed propertly", function() {
 	equal( $( resultsClassSelector ).length, 0, "One instance, results removed" );
 	
 	$("#qunit-fixture").append("<input>");
-	$inputs = $("#qunit-fixture input");
+	var $inputs = $("#qunit-fixture input");
 	equal( $inputs.length, 2, "Two instances" );
 	domEqual( $inputs, function() {
 		$inputs.acompleter().acompleter( "destroy" );

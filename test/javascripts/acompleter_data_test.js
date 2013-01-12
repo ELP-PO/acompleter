@@ -1,8 +1,3 @@
-(function( $ ) {
-
-var localData = [ "c++", "Java", "Php", "Coldfusion", "Javascript", "Asp", "Ruby", "Python", "C", "Scala", "Groovy", "Haskell", "Perl" ];
-    
-
 module( "Local data", {
 	setup: function() {
 		console.log("Local data.setup");
@@ -12,6 +7,9 @@ module( "Local data", {
 			minChars: 0
 		});
 		this.plugin = this.$el.data('plugin_acompleter');
+		this.waitDelay = function( callback ) {
+			setTimeout( callback, this.plugin.options.delay + 100 );
+		};
 	},
 	teardown: function() {
 		console.log("Local data.teardown");
@@ -26,11 +24,22 @@ asyncTest( "Local data is loaded", function() {
 
 	Syn.click( {}, "test-input" ).type("A\b");
 
-	setTimeout(function() {
+    this.waitDelay(function() {
 		deepEqual( plugin.results, plugin.options.data, "Local data fully loaded" );
 		start();
-	}, plugin.options.delay + 100 );
+    });
 });
 
 
-}( jQuery ));
+asyncTest( "Local data is filtered propertly", function() {
+	var plugin = this.plugin;
+	expect( 2 );
+
+	Syn.click( {}, "test-input" ).type("Java");
+
+	this.waitDelay(function() {
+		equal( plugin.results.length, 2, "Finded two results" );
+		equal( plugin.$results.find("ul>li").length, 2, "Displayed two results" );
+		start();
+	});
+});

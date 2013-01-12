@@ -2,7 +2,7 @@ module( "Keyboard interaction", {
 	setup: function() {
 		console.log("Keyboard interaction.setup");
 		this.$fixture = $("#qunit-fixture");
-		this.$el = this.$fixture.find("#test-input").acompleter();
+		this.$el = this.$fixture.find("#test-input").acompleter({ data: localData });
 		this.plugin = this.$el.data('plugin_acompleter');
 		this.waitDelay = function( callback ) {
 			setTimeout( callback, this.plugin.options.delay + 100 );
@@ -50,8 +50,27 @@ asyncTest( "Down arrow first time executes activate method", function() {
 	this.waitDelay(function() { start(); });	
 });
 
+/*
+asyncTest( "Up/Down arrow changing highlight element (.current)", function() {
+    var plugin = this.plugin;
 
-/* TODO:
-bla bla 
-bla bla
-*/
+//    Syn.click( {}, "test-input" ).type("
+
+});
+    */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

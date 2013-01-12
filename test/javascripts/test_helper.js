@@ -2,9 +2,15 @@
 //= require_tree .
 //= require_self
 
-var resultsClassSelector = "." + $.Acompleter._defaults.resultsClass,
-    resultsIdSelector = "#" + $.Acompleter._defaults.resultsId;
+/*
+ * GLOBALS
+ */
+var LiveReload;
 
+var resultsClassSelector = "." + $.Acompleter._defaults.resultsClass,
+    resultsIdSelector = "#" + $.Acompleter._defaults.resultsId,
+    localData = [ "c++", "Java", "Php", "Coldfusion", "Javascript", "Asp",
+                "Ruby", "Python", "C", "Scala", "Groovy", "Haskell", "Perl" ];
 /*
  * Experimental assertion for comparing DOM objects.
  *

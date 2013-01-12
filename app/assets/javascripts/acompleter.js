@@ -15,9 +15,15 @@
             resultsId: pluginName + "-results",
             currentClass: "current",
             onError: undefined,
+            beforeUseConverter: null,
             listLength: 10,
             minChars: 0,
             matchInside: true,
+            matchCase: false,
+            filter: null,
+            filterResults: true,
+            sortResults: false,
+            sortFunction: null,
 
             getValue: function( result ) { return result; },
             /**
@@ -28,6 +34,38 @@
             _dummy: "just to be last item"
         };
 
+
+    /**
+     * Sanitize result
+     * @param {Object} result
+     * @returns {Object} object with members value (String) and data (Object)
+     * @private
+     */
+    var sanitizeResult = function( result ) {
+        return result;
+        /*
+        var value, data,
+            type = typeof result;
+        if ( type === 'string' ) {
+            value = result;
+            data = {};
+        } else if ( $.isArray( result ) ) {
+            value = result[ 0 ];
+            data = result.slice( 1 );
+        } else if ( type === 'object' ) {
+            value = result.value;
+            data = result.data;
+        }
+        value = String( value );
+        if ( typeof data !== 'object' ) {
+            data = {};
+        }
+        return {
+            value: value,
+            data: data
+        };
+        */
+    };
 
     /**
      * Create partial url for a name/value pair
@@ -54,6 +92,32 @@
     };
 
 
+    /**
+     * Default sort filter
+     * @param {object} a
+     * @param {object} b
+     * @param {boolean} matchCase
+     * @returns {number}
+     */
+    var sortValueAlpha = function( a, b, matchCase ) {
+//        a = String( a.value );
+ ////       b = String( b.value );
+        a = String( a );
+        b = String( b );
+        if ( !matchCase ) {
+            a = a.toLowerCase();
+            b = b.toLowerCase();
+        }
+        if ( a > b ) {
+            return 1;
+        }
+        if ( a < b ) {
+            return -1;
+        }
+        return 0;
+    };
+
+
     $.Acompleter = function( $elem, options ) {
         /**
          * Assert parameters
@@ -73,8 +137,8 @@
         this._keyTimeout = null;
         this._lastProcessedValue = undefined;
         this.results = [];
-        this.$elem = $elem;
         this.$results = null;
+        this.$elem = $elem;
 
         this.init();
     };
@@ -88,8 +152,8 @@
         this.$results = this.createList();
         $("body").append( this.$results );
 
-        this.$elem.bind( "processed." + pluginName, function() { self.updateCurrent(); } );
-        this.$elem.bind( "processed." + pluginName, function() { self.showResults(); } );
+//        this.$elem.bind( "processed." + pluginName, function() { self.updateCurrent(); } );
+//        this.$elem.bind( "processed." + pluginName, function() { self.showResults(); } );
         this.$elem.bind( "keydown." + pluginName, function( e ) {
             //console.log( 'keykode:' , e.keyCode );
             switch ( parseInt(e.keyCode) ) {
@@ -156,25 +220,53 @@
     }; // this.activate
 
 
+    /**
+     * Activate plugin immediately
+     */
     $.Acompleter.prototype.activateNow = function() {
-        // TODO: prepare value, check necessary to update
-        var value = this.$elem.val();
-        this.fetchData( value );
-    }; // this.activateNow
-
-
-    $.Acompleter.prototype.fetchData = function( value ) {
-        // ?? this._lastProcessedValue = value;
-        if ( value.length < this.options.minChars ) {
-            this.processResults( value, [] );
-        } else if ( this.options.data ) {
-            this.processResults( value, this.options.data );
-        } else {
-            this.fetchRemoteData( value );
+        var value = this.beforeUseConverter( this.$elem.val() );
+        if ( value !== this._lastProcessedValue ) {
+            this.fetchData( value );
         }
-    }; // fetchData
+    };
 
-    
+    /**
+     * Convert string before use
+     * @param s
+     */
+    $.Acompleter.prototype.beforeUseConverter = function( value ) {
+        var converter = this.options.beforeUseConverter;
+        if ( $.isFunction(converter) ) {
+            value = converter( value );
+        }
+        return value;
+    };
+
+    /**
+     * Get autocomplete data for a given value
+     * @param {string} value Value to base autocompletion on
+     * @private
+     */
+    $.Acompleter.prototype.fetchData = function( value ) {
+        var self = this;
+        var processResults = function( results, filter ) {
+            self.results = self.filterResults(results, filter);
+            self.updateCurrent();
+            self.showResults();
+        };
+        this._lastProcessedValue = value;
+        if ( value.length < this.options.minChars ) {
+            processResults( [], value );
+        } else if ( this.options.data ) {
+            processResults( this.options.data, value );
+        } else {
+            this.fetchRemoteData( value, function( remoteData ) {
+                processResults( remoteData, value );
+            });
+        }
+    };
+
+
     $.Acompleter.prototype.fetchRemoteData = function( value ) {
         var data = this.cacheRead( value );
         if ( data ) {
@@ -206,15 +298,100 @@
     }; // fetchRemoteData
 
 
-    $.Acompleter.prototype.processResults = function( value, data ) {
-        // TODO: check data === false - need error heandling
-        //
-        this._lastProcessedValue = value;
-        this.results = data;
-        this.$elem.trigger("processed." + pluginName);
-    }; // processResults
+    /**
+     * Default filter for results
+     * @param {Object} result
+     * @param {String} filter
+     * @returns {boolean} Include this result
+     * @private
+     */
+    $.Acompleter.prototype.defaultFilter = function( result, filter ) {
+        /*
+        if ( !result.value ) {
+            return false;
+        }
+        */
+        if ( this.options.filterResults ) {
+            var testValue = result, //.value,
+                pattern = filter;
+            /*
+            var pattern = this.matchStringConverter(filter);
+            var testValue = this.matchStringConverter(result.value);
+            */
+            if ( !this.options.matchCase ) {
+                pattern = pattern.toLowerCase();
+                testValue = testValue.toLowerCase();
+            }
+            var patternIndex = testValue.indexOf( pattern );
+            if ( this.options.matchInside ) {
+                return patternIndex > -1;
+            } else {
+                return patternIndex === 0;
+            }
+        }
+        return true;
+    };
+
+    /**
+     * Filter result
+     * @param {Object} result
+     * @param {String} filter
+     * @returns {boolean} Include this result
+     * @private
+     */
+    $.Acompleter.prototype.filterResult = function( result, filter ) {
+        // No filter
+        if ( this.options.filter === false ) {
+            return true;
+        }
+        // Custom filter
+        if ( $.isFunction(this.options.filter) ) {
+            return this.options.filter( result, filter );
+        }
+        // Default filter
+        return this.defaultFilter( result, filter );
+    };
+
+    /**
+     * Filter results
+     * @param results
+     * @param filter
+     */
+    $.Acompleter.prototype.filterResults = function( results, filter ) {
+        var i, result,
+            filtered = [];
+
+        for ( i = 0; i < results.length; i++ ) {
+            result = sanitizeResult( results[ i ] );
+            if ( this.filterResult( result, filter ) ) {
+                filtered.push( result );
+            }
+        }
+        if ( this.options.sortResults ) {
+            filtered = this.sortResults( filtered, filter );
+        }
+        return filtered;
+    };
 
 
+    /**
+     * Sort results
+     * @param results
+     * @param filter
+     */
+    $.Acompleter.prototype.sortResults = function( results, filter ) {
+        var self = this;
+        var sortFunction = this.options.sortFunction;
+        if ( !$.isFunction( sortFunction ) ) {
+            sortFunction = function( a, b, f ) {
+                return sortValueAlpha( a, b, self.options.matchCase );
+            };
+        }
+        results.sort(function( a, b ) {
+            return sortFunction( a, b, filter, self.options );
+        });
+        return results;
+    };
     /**
      * Update index of the current item in new results set
      * or set to first item if current item is not found in reulsts
@@ -224,12 +401,15 @@
         if ( this.results.length === 0 ) {
             return;
         }
-        var i, currentString,
+        var i, currentValue, comparator,
             index = 0;
         if ( this._current.valueToCompare !== null ) {
             currentValue = this.$results.find(".current").data('valueToCompare');
+            comparator = this.options.sortResult ?
+                function( test ) { return currentValue >= test; } :
+                function( test ) { return currentValue == test; };
             for ( i = this.results.length; i--; i ) {
-                if ( currentValue >= this.results[ i ].name ) {
+                if ( comparator( this.options.getComparableValue(this.results[ i ]) ) ) {
                     index = i;
                     break;
                 }
@@ -256,7 +436,6 @@
      * Smart replace dom-list items by results items
      **/
     $.Acompleter.prototype.showResults = function() {
-        //console.log("showResults start");
         if ( this.results.length === 0 ) {
             this.hideResults();
             this._active = false;
