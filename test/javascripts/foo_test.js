@@ -1,22 +1,23 @@
+var resultsClassSelector = "." + $.Acompleter._defaults.resultsClass,
+    resultsIdSelector = "#" + $.Acompleter._defaults.resultsId;
+
 // Test proper initialization which appears at the start of the page without user interaction
 module( "Setup", {
 	setup: function() {
 		console.log("Setup.setup");
-		this.$el = $( "#test-input" );
-		this.resultsClassSelector = "." + $.Acompleter._defaults.resultsClass;
-		this.resultsIdSelector = "#" + $.Acompleter._defaults.resultsId;
+		this.$fixture = $("#qunit-fixture");
+		this.$el = this.$fixture.find("#test-input");
 	},
 	teardown: function() {
 		console.log("Setup.teardown");
-		$(this.resultsClassSelector).remove();
-		$(this.resultsIdSelector).remove();
+		this.$fixture.find("input").acompleter("destroy");
 	}
 });
 
 test( "Plugin is created propertly", function() {
 	strictEqual( this.$el.data("plugin_acompleter"), undefined, "plugin is not initialized" );
-	strictEqual( $(this.resultsClassSelector).length, 0, "results element is absent (check by class)" );
-	strictEqual( $(this.resultsIdSelector).length, 0, "results element is absent (check by id)" );
+	strictEqual( $(resultsClassSelector).length, 0, "results element is absent (check by class)" );
+	strictEqual( $(resultsIdSelector).length, 0, "results element is absent (check by id)" );
 	
 	this.$el.acompleter();
 	
@@ -24,22 +25,45 @@ test( "Plugin is created propertly", function() {
 	ok( plugin, "plugin instance is attached to element's data" );
 	ok( plugin instanceof $.Acompleter, "plugin is instance of $.Acompleter" );
 	strictEqual( plugin.$elem.get(0), this.$el.get(0), "plugin element is attached propertly" );
-	strictEqual( plugin.$results.get(0), $(this.resultsIdSelector).get(0), "plugin results list is created" );
-	strictEqual( $(this.resultsClassSelector).length, 1, "plugin results list is only one" );
+	strictEqual( plugin.$results.get(0), $(resultsIdSelector).get(0), "plugin results list is created" );
+	strictEqual( $(resultsClassSelector).length, 1, "plugin results list is only one" );
+});
+
+test( "Plugin is destroyed propertly", function() {
+	expect( 7 );
+
+	domEqual( "#test-input", function() {
+		$( "#test-input" ).acompleter().acompleter( "destroy" );
+	}, "One instance, clear element" );
+	equal( $( resultsClassSelector ).length, 0, "One instance, results removed" );
+	
+	$("#qunit-fixture").append("<input>");
+	$inputs = $("#qunit-fixture input");
+	equal( $inputs.length, 2, "Two instances" );
+	domEqual( $inputs, function() {
+		$inputs.acompleter().acompleter( "destroy" );
+	}, "Two instances, clear element" );
+	equal( $( resultsClassSelector ).length, 0, "Two instances, results removed" );
+	
+	$inputs.eq(0).acompleter();
+	domEqual( $inputs.eq(1), function() {
+		$inputs.eq(1).acompleter().acompleter( "destroy" );
+	}, "One of two instances, clear element" );
+	equal( $( resultsClassSelector ).length, 1, "One of two instances, results did't removed" );
 });
 
 test( "Many plugins share one results element", function() {
-	$( "#qunit-fixture" ).append( "<input>" ).append( "<input>" );
-	strictEqual( $(this.resultsClassSelector).length, 0, "results element is absent (check by class)" );
+	this.$fixture.append( "<input>" ).append( "<input>" );
+	strictEqual( $(resultsClassSelector).length, 0, "results element is absent (check by class)" );
 	
-	$( "#qunit-fixture input" ).acompleter();
+	this.$fixture.find("input").acompleter();
 	
-	strictEqual( $(this.resultsClassSelector).length, 1, "results element is only one" );
+	strictEqual( $(resultsClassSelector).length, 1, "results element is only one" );
 });
 
 
 test( "Plugin is chained propertly", function() {
-	$( "#qunit-fixture" ).append( "<input>" );
+	this.$fixture.append( "<input>" );
 	var $elements = $( "#qunit-fixture input" );
 	deepEqual( $elements.acompleter(), $elements, "plugin is chained" );
 });
@@ -64,18 +88,16 @@ test( "Options is loaded propertly", function() {
 module( "Keyboard interaction", {
 	setup: function() {
 		console.log("Keyboard interaction.setup");
-		this.$el = $( "#test-input" ).acompleter();
+		this.$fixture = $("#qunit-fixture");
+		this.$el = this.$fixture.find("#test-input").acompleter();
 		this.plugin = this.$el.data('plugin_acompleter');
 		this.waitDelay = function( callback ) {
 			setTimeout( callback, this.plugin.options.delay + 100 );
 		};
-		this.resultsClassSelector = "." + $.Acompleter._defaults.resultsClass;
-		this.resultsIdSelector = "#" + $.Acompleter._defaults.resultsId;
 	},
 	teardown: function() {
 		console.log("Keyboard interaction.teardown");
-		$(this.resultsClassSelector).remove();
-		$(this.resultsIdSelector).remove();
+		this.$fixture.find("input").acompleter("destroy");
 	}
 });
 
@@ -120,18 +142,16 @@ module( "Local data", {
 	setup: function() {
 		console.log("Local data.setup");
 		this.localData = [ "Acompleter", "Belsky", "Handmade", "Javascript", "QUnit", "JQuery", "May", "All", "Beings", "Be", "Happy" ];
-		this.$el = $( "#test-input" ).acompleter({
+		this.$fixture = $("#qunit-fixture");
+		this.$el = this.$fixture.find("#test-input").acompleter({
 			data: this.localData,
 			minChars: 0
 		});
 		this.plugin = this.$el.data('plugin_acompleter');
-		this.resultsClassSelector = "." + $.Acompleter._defaults.resultsClass;
-		this.resultsIdSelector = "#" + $.Acompleter._defaults.resultsId;
 	},
 	teardown: function() {
 		console.log("Local data.teardown");
-		$(this.resultsClassSelector).remove();
-		$(this.resultsIdSelector).remove();
+		this.$fixture.find("input").acompleter("destroy");
 	}
 });
 

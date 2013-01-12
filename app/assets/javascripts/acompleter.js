@@ -12,7 +12,7 @@
             remoteDataType: "json",
             loadingClass: "loading",
             resultsClass: "results",
-            resultsId: "acompleter-results",
+            resultsId: pluginName + "-results",
             currentClass: "current",
             onError: undefined,
             listLength: 10,
@@ -85,9 +85,9 @@
     $.Acompleter.prototype.init = function() {
         var self = this;
 
-        this.$elem.bind( "processed.acompleter", function() { self.updateCurrent(); } );
-        this.$elem.bind( "processed.acompleter", function() { self.showResults(); } );
-        this.$elem.bind( "keydown.acompleter", function( e ) {
+        this.$elem.bind( "processed." + pluginName, function() { self.updateCurrent(); } );
+        this.$elem.bind( "processed." + pluginName, function() { self.showResults(); } );
+        this.$elem.bind( "keydown." + pluginName, function( e ) {
             //console.log( 'keykode:' , e.keyCode );
             switch ( parseInt(e.keyCode) ) {
                 case 40: // down arrow
@@ -128,6 +128,18 @@
             } // switch
         }); // $this.keydown
     }; // init
+
+
+    $.Acompleter.prototype.destroy = function() {
+        console.log('destroy');
+        this.$elem.unbind( "." + pluginName );
+        if ( this.$results.data("instances") == 1 ) {
+            this.$results.remove();
+        } else {
+            this.$results.data( "instances", this.$results.data("instances") - 1 );
+        }
+        this.$elem.removeData( "plugin_" + pluginName );
+    }; // destroy
 
     $.Acompleter.prototype.activate = function() {
         if ( this._keyTimeout ) {
@@ -195,7 +207,7 @@
         //
         this._lastProcessedValue = value;
         this.results = data;
-        this.$elem.trigger("processed.acompleter");
+        this.$elem.trigger("processed." + pluginName);
     }; // processResults
 
 
@@ -251,8 +263,8 @@
             $items = $ul.children("li"),
             scrollTop = Math.max( 0, this._current.index - this.options.listLength + 1 ),
             scrollBottom = Math.min( scrollTop + this.options.listLength, this.results.length ),
-            removeMarkClass = "_remove_mark_acompleter",
-            appendMarkClass = "_append_mark_acompleter";
+            removeMarkClass = "_remove_mark_" + pluginName,
+            appendMarkClass = "_append_mark_" + pluginName;
 
         // Mark items that  be removed
         //
@@ -359,6 +371,7 @@
                 .css( { position: "absolute" } )
                 .append( $("<ul></ul>") );
         }
+        $results.data( 'instances' , ($results.data("instances") || 0) + 1 );
         return $results;
     }; // createList
 
@@ -450,12 +463,29 @@
 
 
 
-    $.fn[ pluginName ] = function( options ) {
-        return this.each(function () {
-            if ( !$.data( this, 'plugin_' + pluginName ) ) {
-                $.data( this, 'plugin_' + pluginName, new $.Acompleter($(this), options) );
-            }
-        });
+    var methods = {
+        destroy: function() {
+            return this.each(function() {
+                var plugin = $(this).data( "plugin_" + pluginName );
+                if ( plugin ) {
+                    plugin.destroy();
+                }
+            });
+        }
+    };
+
+    $.fn[ pluginName ] = function( method ) {
+        if ( methods[ method ] ) {
+            return methods[ method ].apply( this, Array.prototype.slice.call(arguments, 1) );
+        } else if ( typeof method === "object" || !method ){
+            return this.each(function () {
+                if ( !$.data( this, 'plugin_' + pluginName ) ) {
+                    $.data( this, 'plugin_' + pluginName, new $.Acompleter($(this), method) );
+                }
+            });
+        } else {
+            $.error( "Method " +  method + " does not exist on jQuery." + pluginName );
+        }
     };
 
 }( jQuery ));
