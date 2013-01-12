@@ -59,7 +59,8 @@
          * Assert parameters
          */
         if (!$elem || !($elem instanceof $) || $elem.length !== 1 || $elem.get(0).tagName.toUpperCase() !== 'INPUT') {
-            throw new Error('Invalid parameter for jquery.Acompleter, jQuery object with one element with INPUT tag expected.');
+            $.error( "Invalid parameter for jquery." + pluginName
+                    + ", jQuery object with one element with INPUT tag expected.");
         }
 
         this.options = $.extend( {}, defaults, options );
@@ -73,8 +74,7 @@
         this._lastProcessedValue = undefined;
         this.results = [];
         this.$elem = $elem;
-        this.$results = this.createList();
-        $("body").append( this.$results );
+        this.$results = null;
 
         this.init();
     };
@@ -84,6 +84,9 @@
 
     $.Acompleter.prototype.init = function() {
         var self = this;
+
+        this.$results = this.createList();
+        $("body").append( this.$results );
 
         this.$elem.bind( "processed." + pluginName, function() { self.updateCurrent(); } );
         this.$elem.bind( "processed." + pluginName, function() { self.showResults(); } );
@@ -140,6 +143,7 @@
         }
         this.$elem.removeData( "plugin_" + pluginName );
     }; // destroy
+
 
     $.Acompleter.prototype.activate = function() {
         if ( this._keyTimeout ) {

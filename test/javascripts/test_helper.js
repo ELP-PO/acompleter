@@ -2,6 +2,8 @@
 //= require_tree .
 //= require_self
 
+var resultsClassSelector = "." + $.Acompleter._defaults.resultsClass,
+    resultsIdSelector = "#" + $.Acompleter._defaults.resultsId;
 
 /*
  * Experimental assertion for comparing DOM objects.
