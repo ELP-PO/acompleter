@@ -178,8 +178,11 @@
                     //return !this.selectHighlighted();
                     break;
                 case 27: // escape
-                    //this.hideList();
-                    //return false;
+                    if (self._active) {
+                        e.preventDefault();
+                        self.deactivate(true);
+                        return false;
+                    }
                     break;
                 /*
                  * Ignore navigational and special keys
@@ -199,7 +202,6 @@
 
 
     $.Acompleter.prototype.destroy = function() {
-        console.log('destroy');
         this.$el.unbind( "." + pluginName );
         if ( this.$results.data("instances") == 1 ) {
             this.$results.remove();

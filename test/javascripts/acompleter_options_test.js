@@ -18,38 +18,31 @@ module( "Options", {
 asyncTest( "minChars", function() {
 	var plugin = this.plugin;
         self = this;
-    plugin.options.minChars = 3;
-    expect( 14 );
+    var assertInactive = function() {
+		equal( plugin.results.length, 0, "results are not loaded" );
+        equal( plugin._active, false, "plugin is not active" );
+        equal( plugin.getItems().length, 0, "results are not displayed" );
+		ok( plugin.$results.is(":hidden"), "list is hidden" );
+    };
 
-	Syn.click( {}, "test-input" ).type("J");
+    plugin.options.minChars = 3;
+    expect( 12 );
+
+	Syn.click( {}, plugin.$el ).type("J");
 
 	this.waitDelay(function() {
-		equal( plugin.results.length, 0, "Results are not loaded" );
-        equal( plugin._active, false, "Plugin is not active" );
-        equal( plugin.$results.find(">ul>li").length, 0, "Results are not displayed" );
-		ok( plugin.$results.is(":hidden"), "List is hidden" );
-        Syn.click( {}, "test-input" ).type("a");
-
+        assertInactive();
+        Syn.type( "a", plugin.$el ); // typed: Ja
         self.waitDelay(function() {
-            equal( plugin.$el.val(), "Ja", "kb ok" );
-            equal( plugin.results.length, 0, "Results are not loaded" );
-            equal( plugin._active, false, "Plugin is not active" );
-            equal( plugin.$results.find(">ul>li").length, 0, "Results are not displayed" );
-            ok( plugin.$results.is(":hidden"), "List is hidden" );
-
-            Syn.click( {}, "test-input" ).type("v");
+            assertInactive();
+            Syn.type( "v", plugin.$el ); // typed Jav
             self.waitDelay(function() {
-                equal( plugin.$el.val(), "Jav", "kb ok" );
-                equal( plugin.results.length, 2, "Results are loaded" );
-                equal( plugin._active, true, "Plugin is not active" );
-                equal( plugin.$results.find(">ul>li").length, 2, "Results are displayed" );
-                ok( plugin.$results.is(":visible"), "List is visible" );
                 start();
+                equal( plugin.results.length, 2, "results are loaded" );
+                equal( plugin._active, true, "plugin is not active" );
+                equal( plugin.getItems().length, 2, "results are displayed" );
+                ok( plugin.$results.is(":visible"), "list is visible" );
             });
         });
-        
-
 	});
-
-
 });

@@ -123,10 +123,10 @@ asyncTest( "Navigation and scroll up", function() {
 });
 
 
-asyncTest( "On blur hide results", function() {
+asyncTest( "Hide results when blur", function() {
     var plugin = this.plugin;
 
-    Syn.click( {}, "test-input" ).type( "[down]" );
+    Syn.click( {}, this.$el ).type( "[down]" );
 
     this.waitDelay(function() {
         deepEqual( plugin.results, localData, "data is loaded" );
@@ -141,5 +141,24 @@ asyncTest( "On blur hide results", function() {
             equal( plugin._active, false, "plugin is deactivated" );
         }, 10);
 
+    });
+});
+
+
+asyncTest( "Hide results when escape", function() {
+    var plugin = this.plugin;
+
+    Syn.click( {}, this.$el ).type( "[down]" );
+
+    this.waitDelay(function() {
+        deepEqual( plugin.results, localData, "data is loaded" );
+        ok( plugin.$results.is(":visible"), "results are shown" );
+        equal( plugin._active, true, "plugin is activated" );
+
+        Syn.type( "[escape]", plugin.$el, function() {
+            start();
+            ok( plugin.$results.is(":hidden"), "results are hidden" );
+            equal( plugin._active, false, "plugin is deactivated" );
+        });
     });
 });
