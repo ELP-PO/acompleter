@@ -22,10 +22,10 @@ asyncTest( "Local data is loaded", function() {
 	var plugin = this.plugin;
 	expect( 1 );
 
-	Syn.click( {}, "test-input" ).type("A\b");
+	Syn.click( {}, this.$el ).type("A\b");
 
     this.waitDelay(function() {
-		deepEqual( plugin.results, plugin.options.data, "Local data fully loaded" );
+		deepEqual( plugin.results, plugin.options.data, "local data fully loaded" );
 		start();
     });
 });
@@ -35,11 +35,11 @@ asyncTest( "Local data is filtered propertly", function() {
 	var plugin = this.plugin;
 	expect( 2 );
 
-	Syn.click( {}, "test-input" ).type("Java");
+	Syn.click( {}, this.$el ).type("Java");
 
 	this.waitDelay(function() {
-		equal( plugin.results.length, 2, "Finded two results" );
-		equal( plugin.$results.find("ul>li").length, 2, "Displayed two results" );
+		equal( plugin.results.length, 2, "found two results" );
+		equal( plugin.getItems().length, 2, "displayed two results" );
 		start();
 	});
 });

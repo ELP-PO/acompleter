@@ -1,4 +1,4 @@
-module( "Keyboard interaction", {
+module( "Events", {
 	setup: function() {
 		console.log("Keyboard interaction.setup");
 		this.$fixture = $("#qunit-fixture");
@@ -160,5 +160,24 @@ asyncTest( "Hide results when escape", function() {
             ok( plugin.$results.is(":hidden"), "results are hidden" );
             equal( plugin._active, false, "plugin is deactivated" );
         });
+    });
+});
+
+asyncTest( "Select current on enter", function() {
+    var plugin = this.plugin;
+
+    // activate list
+    Syn.click( {}, plugin.$el ).type("[down]");
+    this.waitDelay(function() {
+        // navigate to third item
+        Syn.type( "[down][down]", plugin.$el, function() {
+                equal( plugin._current.valueToCompare, "Php", "php selected") ;
+            })
+            // select current item
+            .then( "_type", "\r", function() {
+                start();
+                equal( plugin.$el.val(), "Php", "correct value selected" );
+                equal( plugin._active, false, "plugin is deactivated" );
+            });
     });
 });

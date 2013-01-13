@@ -9,6 +9,7 @@ $('#region').acompleter({
 
 
 $('#local').acompleter({
+	_debug: true,
 	data: [ "c++", "Java", "Php", "Coldfusion", "Javascript", "Asp", "Ruby", "Python", "C", "Scala", "Groovy", "Haskell", "Perl" ]
 });
 
