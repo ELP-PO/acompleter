@@ -135,6 +135,7 @@
         this._current = { index: 0, valueToCompare: null };
         this._keyTimeout = null;
         this._lastProcessedValue = undefined;
+        this._ignoreBlur = false;
         this.results = [];
         this.$results = null;
         this.$el = $el;
@@ -151,9 +152,10 @@
         this.$results = this.createList();
         $("body").append( this.$results );
 
-        this.$el.bind( "blur." + pluginName, function() {
-            if (self.options._debug) { return; }
-            self.deactivate( true );
+        this.$el.bind( "blur." + pluginName, function(e) {
+            if ( !self._ignoreBlur && !self.options._debug ) {
+                self.deactivate( true );
+            }
         });
 
         this.$el.bind( "keydown." + pluginName, function( e ) {
@@ -577,7 +579,9 @@
 
 
     $.Acompleter.prototype.createListItem = function( index ) {
-        var result = this.results[ index ],
+        var $li,
+            self = this,
+            result = this.results[ index ],
             // TODO: escape processed value to safly use in RegEx
             pattern = new RegExp(
                 ( this.options.matchInside ? "" : "^" ) + this._lastProcessedValue,
@@ -585,10 +589,15 @@
             );
         // TODO: figure out what to do when `getValue` appends text
         //       which trigger math against `_lastProcessedValue`
-        return $("<li></li>")
+        $li = $("<li></li>")
             .html( this.options.getValue(result).replace( pattern, "<span>$&</span>" ) )
             .data( "valueToCompare", this.options.getComparableValue(result) )
             .data( "index", index );
+        $li.click(function() { self.selectItem( $li ); })
+            .mousedown(function() { self._ignoreBlur = true; })
+            .mouseup(function() { self._ignoreBlur = false; })
+            .mouseover(function() { self.focusItem( $li ); });
+        return $li;
     }; // createListItem
 
 
@@ -619,13 +628,13 @@
         this.selectItem( this.getCurrentItem() );
     };
 
+
     $.Acompleter.prototype.selectItem = function($li) {
         var value = $li.data("valueToCompare");
         this.deactivate( true );
         this.$el.val( value );
         this.$el.focus();    
     };
-
 
 
     $.Acompleter.prototype.focusNext = function() {
@@ -638,33 +647,39 @@
     }; // focusPrev
 
 
-
     $.Acompleter.prototype.focusMove = function( modifier ) {
-        //console.log("focusMove start");
         if ( !this.results.length ) {
             return;
         }
-        var currentClass = this.options.currentClass,
-            currentOutside = true,
-            index = Math.max( 0, Math.min(this.results.length - 1, this._current.index + modifier) );
+        var index = Math.max( 0, Math.min(this.results.length - 1, this._current.index + modifier) );
+        if ( !this.focusItem(index) ) {
+            // Redraw results with new scroll position
+            this.scrollList( modifier );
+        }
+    }; // focusMove
 
+    $.Acompleter.prototype.focusItem = function( item ) {
+        var index,
+            currentClass = this.options.currentClass,
+            itemFocused = false;
+        if ( typeof item === "number" ) {
+            index = item;
+        } else {
+            index = item.data("index");
+        }
         this.setCurrent( index );
-
         this.getItems().each(function() {
             var $this = $( this );
             if ( $this.data("index") === index ) {
                 $this.addClass( currentClass );
-                currentOutside = false;
+                itemFocused = true;
             } else {
                 $this.removeClass( currentClass );
             }
         });
-        // Redraw results with new scroll position
-        if ( currentOutside ) {
-            this.scrollList( modifier );
-        }
-        //console.log("focusMove end");
-    }; // focusMove
+        return itemFocused;
+    }; // focusItem
+
 
     $.Acompleter.prototype.scrollList = function( modifier ) {
         var $newItem = this.createListItem( this._current.index ).addClass( this.options.currentClass );
@@ -673,9 +688,11 @@
             .children( "li:" + (modifier === 1 ? "first" : "last") ).remove();
     }; // scrollList
 
+
     $.Acompleter.prototype.getItems = function( selector ) {
         return this.$results.find( ">ul>li" + (selector || "") );
     };
+
 
     $.Acompleter.prototype.getCurrentItem = function() {
         return this.getItems( "." + this.options.currentClass );

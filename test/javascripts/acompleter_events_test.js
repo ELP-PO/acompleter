@@ -169,15 +169,46 @@ asyncTest( "Select current on enter", function() {
     // activate list
     Syn.click( {}, plugin.$el ).type("[down]");
     this.waitDelay(function() {
-        // navigate to third item
-        Syn.type( "[down][down]", plugin.$el, function() {
-                equal( plugin._current.valueToCompare, "Php", "php selected") ;
+        // navigate to fifth item
+        Syn.type( "[down][down][down][down]", plugin.$el, function() {
+                equal( plugin._current.valueToCompare, "Javascript", "javascript selected") ;
             })
             // select current item
             .then( "_type", "\r", function() {
                 start();
-                equal( plugin.$el.val(), "Php", "correct value selected" );
+                equal( plugin.$el.val(), "Javascript", "correct value selected" );
                 equal( plugin._active, false, "plugin is deactivated" );
             });
+    });
+});
+
+
+asyncTest( "Select item by click", function() {
+    var plugin = this.plugin;
+
+    // activate list
+    Syn.click( {}, plugin.$el ).type("[down]");
+    this.waitDelay(function() {
+        // click to the fifth item
+        Syn.click( {}, plugin.getItems().eq(4), function() {
+            start();
+            equal( plugin.$el.val(), "Javascript", "correct value selected" );
+            equal( plugin._active, false, "plugin is deactivated" );
+        });
+    });
+});
+
+
+asyncTest( "Focus item by mouseover", function() {
+    var self = this;
+
+    // activate list
+    Syn.click( {}, self.$el ).type("[down]");
+    this.waitDelay(function() {
+        self.plugin.getItems().eq(4).trigger("mouseover");
+        setTimeout(function() {
+            start();
+            self.assertNavigation(4);
+        }, 10);
     });
 });
