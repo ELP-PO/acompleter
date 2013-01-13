@@ -31,7 +31,7 @@ asyncTest( "minChars", function() {
         Syn.click( {}, "test-input" ).type("a");
 
         self.waitDelay(function() {
-            equal( plugin.$elem.val(), "Ja", "kb ok" );
+            equal( plugin.$el.val(), "Ja", "kb ok" );
             equal( plugin.results.length, 0, "Results are not loaded" );
             equal( plugin._active, false, "Plugin is not active" );
             equal( plugin.$results.find(">ul>li").length, 0, "Results are not displayed" );
@@ -39,7 +39,7 @@ asyncTest( "minChars", function() {
 
             Syn.click( {}, "test-input" ).type("v");
             self.waitDelay(function() {
-                equal( plugin.$elem.val(), "Jav", "kb ok" );
+                equal( plugin.$el.val(), "Jav", "kb ok" );
                 equal( plugin.results.length, 2, "Results are loaded" );
                 equal( plugin._active, true, "Plugin is not active" );
                 equal( plugin.$results.find(">ul>li").length, 2, "Results are displayed" );

@@ -117,11 +117,11 @@
     };
 
 
-    $.Acompleter = function( $elem, options ) {
+    $.Acompleter = function( $el, options ) {
         /**
          * Assert parameters
          */
-        if (!$elem || !($elem instanceof $) || $elem.length !== 1 || $elem.get(0).tagName.toUpperCase() !== 'INPUT') {
+        if (!$el || !($el instanceof $) || $el.length !== 1 || $el.get(0).tagName.toUpperCase() !== 'INPUT') {
             $.error( "Invalid parameter for jquery." + pluginName
                     + ", jQuery object with one element with INPUT tag expected.");
         }
@@ -137,7 +137,7 @@
         this._lastProcessedValue = undefined;
         this.results = [];
         this.$results = null;
-        this.$elem = $elem;
+        this.$el = $el;
 
         this.init();
     };
@@ -151,9 +151,11 @@
         this.$results = this.createList();
         $("body").append( this.$results );
 
-//        this.$elem.bind( "processed." + pluginName, function() { self.updateCurrent(); } );
-//        this.$elem.bind( "processed." + pluginName, function() { self.showResults(); } );
-        this.$elem.bind( "keydown." + pluginName, function( e ) {
+        this.$el.bind( "blur." + pluginName, function() {
+            self.deactivate( true );
+        });
+
+        this.$el.bind( "keydown." + pluginName, function( e ) {
             //console.log( 'keykode:' , e.keyCode );
             switch ( parseInt(e.keyCode) ) {
                 case 40: // down arrow
@@ -198,13 +200,13 @@
 
     $.Acompleter.prototype.destroy = function() {
         console.log('destroy');
-        this.$elem.unbind( "." + pluginName );
+        this.$el.unbind( "." + pluginName );
         if ( this.$results.data("instances") == 1 ) {
             this.$results.remove();
         } else {
             this.$results.data( "instances", this.$results.data("instances") - 1 );
         }
-        this.$elem.removeData( "plugin_" + pluginName );
+        this.$el.removeData( "plugin_" + pluginName );
     }; // destroy
 
 
@@ -223,7 +225,7 @@
      * Activate plugin immediately
      */
     $.Acompleter.prototype.activateNow = function() {
-        var value = this.beforeUseConverter( this.$elem.val() );
+        var value = this.beforeUseConverter( this.$el.val() );
         if ( value !== this._lastProcessedValue ) {
             this.fetchData( value );
         }
@@ -276,11 +278,11 @@
                     if ( data.length ) {
                         self.cacheWrite( value, data );
                     }
-                    self.$elem.removeClass( self.options.loadingClass );
+                    self.$el.removeClass( self.options.loadingClass );
                     self.processResults( value, data );
                 };
 
-            this.$elem.addClass( this.options.loadingClass );
+            this.$el.addClass( this.options.loadingClass );
             $.ajax({
                 url: makeUrl( this.options.url, { q: value } ),
                 success: ajaxCallback,
@@ -542,6 +544,18 @@
     }; // hideResults
 
 
+    $.Acompleter.prototype.deactivate = function( finish ) {
+        if ( this._keyTimeout ) {
+            clearTimeout( this._keyTimeout );
+        }
+        if ( finish ) {
+            this._lastProcessedValue = null;
+            this._active = false;
+        }
+        this.hideResults();
+    };
+
+
     $.Acompleter.prototype.createList = function() {
         var $results = $( "#" + this.options.resultsId );
         if ( !$results.length ) {
@@ -558,6 +572,7 @@
 
     $.Acompleter.prototype.createListItem = function( index ) {
         var result = this.results[ index ],
+            // TODO: escape processed value to safly use in RegEx
             pattern = new RegExp(
                 ( this.options.matchInside ? "" : "^" ) + this._lastProcessedValue,
                 "i"
@@ -574,9 +589,9 @@
     $.Acompleter.prototype.showList = function() {
         // Always recalculate position since window size or
         // input element location may have changed.
-        var position = this.$elem.offset();
-        position.top += this.$elem.outerHeight();
-        position.minWidth = this.$elem.outerWidth() - ( this.$results.outerWidth() - this.$results.width() );
+        var position = this.$el.offset();
+        position.top += this.$el.outerHeight();
+        position.minWidth = this.$el.outerWidth() - ( this.$results.outerWidth() - this.$results.width() );
 
         this.$results
             .css( position )

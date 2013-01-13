@@ -123,7 +123,6 @@ asyncTest( "Navigation and scroll up", function() {
 });
 
 
-/*
 asyncTest( "On blur hide results", function() {
     var plugin = this.plugin;
 
@@ -132,6 +131,15 @@ asyncTest( "On blur hide results", function() {
     this.waitDelay(function() {
         deepEqual( plugin.results, localData, "data is loaded" );
         ok( plugin.$results.is(":visible"), "results are shown" );
+        equal( plugin._active, true, "plugin is activated" );
+
+        plugin.$el.blur();
+
+        setTimeout(function() {
+            start();
+            ok( plugin.$results.is(":hidden"), "results are hidden" );
+            equal( plugin._active, false, "plugin is deactivated" );
+        }, 10);
+
     });
 });
-*/

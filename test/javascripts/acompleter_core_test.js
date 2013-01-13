@@ -20,7 +20,7 @@ test( "Plugin is created propertly", function() {
 	var plugin = this.$el.data("plugin_acompleter");
 	ok( plugin, "plugin instance is attached to element's data" );
 	ok( plugin instanceof $.Acompleter, "plugin is instance of $.Acompleter" );
-	strictEqual( plugin.$elem.get(0), this.$el.get(0), "plugin element is attached propertly" );
+	strictEqual( plugin.$el.get(0), this.$el.get(0), "plugin element is attached propertly" );
 	strictEqual( plugin.$results.get(0), $(resultsIdSelector).get(0), "plugin results list is created" );
 	strictEqual( $(resultsClassSelector).length, 1, "plugin results list is only one" );
 });
