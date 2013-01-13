@@ -7,6 +7,14 @@ module( "Keyboard interaction", {
 		this.waitDelay = function( callback ) {
 			setTimeout( callback, this.plugin.options.delay + 100 );
 		};
+        this.assertCurrent = function( index ) {
+            equal( this.plugin._current.index, index, "current position updated" );
+            equal( this.plugin._current.valueToCompare, localData[index], "current value updated" );
+        };
+        this.assertNavigation = function( index ) {
+            this.assertCurrent( index );
+            ok( this.plugin.getItems().eq(index).hasClass("current"), "highlight updated" );
+        };
 	},
 	teardown: function() {
 		console.log("Keyboard interaction.teardown");
@@ -21,7 +29,7 @@ asyncTest( "Ignore special & navigation keys", function() {
 	};
 	expect( 2 );
 	
-	Syn.click( {}, "test-input" ).type( "[left][right][home][end][page-up][page-down][shift][insert][ctrl][alt][caps]" );
+	Syn.click( {}, this.$el ).type( "[left][right][home][end][page-up][page-down][shift][insert][ctrl][alt][caps]" );
 
 	this.waitDelay(function() {
 		ok( plugin.results.length === 0, "Results are not loaded" );
@@ -36,7 +44,7 @@ asyncTest( "Up arrow first time executes activate method", function() {
 	plugin.activate = function() { ok( true, "activate is executed" ) };
 	expect( 1 );
 	
-	Syn.click( {}, "test-input" ).type("[up]");
+	Syn.click( {}, this.$el ).type("[up]");
 	this.waitDelay(function() { start(); });	
 });
 
@@ -46,96 +54,76 @@ asyncTest( "Down arrow first time executes activate method", function() {
 	plugin.activate = function() { ok( true, "activate is executed" ) };
 	expect( 1 );
 	
-	Syn.click( {}, "test-input" ).type("[down]");
+	Syn.click( {}, this.$el ).type("[down]");
 	this.waitDelay(function() { start(); });	
 });
 
 asyncTest( "Navigation and scroll down", function() {
-    var plugin = this.plugin;
-    plugin.options.listLength = 3;
-
-
-    var assertNavigation = function( index ) {
-        equal( plugin._current.index, index, "current position updated" );
-        equal( plugin._current.valueToCompare, localData[index], "current value updated" );
-        ok( plugin.getItems().eq(index).hasClass("current"), "highlight updated" );
-    };
+    var self = this;
+    this.plugin.options.listLength = 3;
 
     // activate list
-	Syn.click( {}, "test-input" ).type("[down]");
+	Syn.click( {}, this.$el ).type("[down]");
 
 	this.waitDelay(function() {
-        deepEqual( plugin.results, localData, "data is loaded" );
-        equal( plugin.getItems().length, 3, "list length is correct" );
-        // select second item
-        Syn.type( "[down]", "test-input" );
-        setTimeout(function() {
-            assertNavigation( 1 );
+        deepEqual( self.plugin.results, localData, "data is loaded" );
+        equal( self.plugin.getItems().length, 3, "list length is correct" );
 
+        // select second item
+        Syn.type( "[down]", self.$el, function() {
+                self.assertNavigation( 1 );
+            })
             // select third item
-            Syn.type( "[down]", "test-input" );
-            setTimeout(function() {
-                assertNavigation( 2 );
-                // select forth item (activate scroll)
-                Syn.type( "[down]", "test-input" );
-                setTimeout(function() {
-                    start();
-                    equal( plugin._current.index, 3, "current position updated" );
-                    equal( plugin._current.valueToCompare, localData[3], "current value updated" );
-                    ok( plugin.getItems().eq(2).hasClass("current"), "highlight third item" );
-                    equal( plugin.getItems().length, 3, "list length = 3" );
-                    equal( plugin.getItems().eq(0).text(), localData[1], "list scrolled" );
-                    equal( plugin.getItems().eq(2).text(), localData[3], "list scrolled" );
-                }, 10);
-            }, 10);
-        }, 10);
-    });	
+            .then( "_type", "[down]", function() {
+                self.assertNavigation( 2 );
+            })
+            // select forth item (activate scroll)
+            .then( "_type", "[down]", function() {
+                start();
+                self.assertCurrent( 3 );
+                ok( self.plugin.getItems().eq(2).hasClass("current"), "highlight third item" );
+                equal( self.plugin.getItems().length, 3, "list length = 3" );
+                equal( self.plugin.getItems().eq(0).text(), localData[1], "list scrolled" );
+                equal( self.plugin.getItems().eq(2).text(), localData[3], "list scrolled" );
+            });
+    });
 });
 
 
 asyncTest( "Navigation and scroll up", function() {
-    var plugin = this.plugin;
-    plugin.options.listLength = 3;
-
-
-    var assertCurrent = function( index ) {
-        equal( plugin._current.index, index, "current position updated" );
-        equal( plugin._current.valueToCompare, localData[index], "current value updated" );
-    };
+    var self = this;
+    this.plugin.options.listLength = 3;
 
     // activate list
-	Syn.click( {}, "test-input" ).type("[down]");
+	Syn.click( {}, this.$el ).type("[down]");
 
 	this.waitDelay(function() {
-        deepEqual( plugin.results, localData, "data is loaded" );
-        equal( plugin.getItems().length, 3, "list length is correct" );
+        deepEqual( self.plugin.results, localData, "data is loaded" );
+        equal( self.plugin.getItems().length, 3, "list length is correct" );
+
         // scroll down 
-        Syn.type( "[down][down][down]", "test-input" );
-        setTimeout(function() {
-            assertCurrent( 3 );
-            ok( plugin.getItems().eq(2).hasClass("current"), "highlight third item" );
-
+        Syn.type( "[down][down][down]", self.$el, function() {
+                self.assertCurrent( 3 );
+                ok( self.plugin.getItems().eq(2).hasClass("current"), "highlight third item" );
+            })
             // move up to top of the list
-            Syn.type( "[up][up]", "test-input" );
-            setTimeout(function() {
-                assertCurrent( 1 );
-                ok( plugin.getItems().eq(0).hasClass("current"), "highlighted first item" );
-
-                // scroll up to first result
-                Syn.type( "[up]", "test-input" );
-                setTimeout(function() {
-                    start();
-                    assertCurrent( 0 );
-                    ok( plugin.getItems().eq(0).hasClass("current"), "highlighted first item" );
-                    equal( plugin.getItems().eq(0).text(), localData[0], "list scrolled" );
-                    equal( plugin.getItems().eq(2).text(), localData[2], "list scrolled" );
-                }, 100);
-            }, 100);
-        }, 100);
-    });	
+            .then( "_type", "[up][up]", function() {
+                self.assertCurrent( 1 );
+                ok( self.plugin.getItems().eq(0).hasClass("current"), "highlighted first item" );
+            })
+            // scroll up to first result
+            .then( "_type", "[up]", function() {
+                start();
+                self.assertCurrent( 0 );
+                ok( self.plugin.getItems().eq(0).hasClass("current"), "highlighted first item" );
+                equal( self.plugin.getItems().eq(0).text(), localData[0], "list scrolled" );
+                equal( self.plugin.getItems().eq(2).text(), localData[2], "list scrolled" );
+            });
+    });
 });
 
 
+/*
 asyncTest( "On blur hide results", function() {
     var plugin = this.plugin;
 
@@ -144,6 +132,6 @@ asyncTest( "On blur hide results", function() {
     this.waitDelay(function() {
         deepEqual( plugin.results, localData, "data is loaded" );
         ok( plugin.$results.is(":visible"), "results are shown" );
-        start();
     });
 });
+*/
