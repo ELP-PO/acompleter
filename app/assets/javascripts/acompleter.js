@@ -21,7 +21,6 @@
             matchInside: true,
             matchCase: false,
             filter: null,
-            filterResults: true,
             sortResults: false,
             sortFunction: null,
 
@@ -250,7 +249,7 @@
     $.Acompleter.prototype.fetchData = function( value ) {
         var self = this;
         var processResults = function( results, filter ) {
-            self.results = self.filterResults(results, filter);
+            self.results = self.filterResults( results, filter );
             self.updateCurrent();
             self.showResults();
         };
@@ -311,23 +310,21 @@
             return false;
         }
         */
-        if ( this.options.filterResults ) {
-            var testValue = result, //.value,
-                pattern = filter;
-            /*
-            var pattern = this.matchStringConverter(filter);
-            var testValue = this.matchStringConverter(result.value);
-            */
-            if ( !this.options.matchCase ) {
-                pattern = pattern.toLowerCase();
-                testValue = testValue.toLowerCase();
-            }
-            var patternIndex = testValue.indexOf( pattern );
-            if ( this.options.matchInside ) {
-                return patternIndex > -1;
-            } else {
-                return patternIndex === 0;
-            }
+        var testValue = result, //.value,
+            pattern = filter;
+        /*
+        var pattern = this.matchStringConverter(filter);
+        var testValue = this.matchStringConverter(result.value);
+        */
+        if ( !this.options.matchCase ) {
+            pattern = pattern.toLowerCase();
+            testValue = testValue.toLowerCase();
+        }
+        var patternIndex = testValue.indexOf( pattern );
+        if ( this.options.matchInside ) {
+            return patternIndex > -1;
+        } else {
+            return patternIndex === 0;
         }
         return true;
     };
@@ -644,6 +641,9 @@
             .children( "li:" + (modifier === 1 ? "first" : "last") ).remove();
     }; // scrollList
 
+    $.Acompleter.prototype.getItems = function() {
+        return this.$results.find( ">ul>li" );
+    };
 
 
     var methods = {

@@ -1,32 +1,55 @@
-/*
-module( "Local data", {
+module( "Options", {
 	setup: function() {
-		console.log("Local data.setup");
-		this.localData = [ "Acompleter", "Belsky", "Handmade", "Javascript", "QUnit", "JQuery", "May", "All", "Beings", "Be", "Happy" ];
 		this.$fixture = $("#qunit-fixture");
 		this.$el = this.$fixture.find("#test-input").acompleter({
-			data: this.localData,
-			minChars: 0
+			data: localData
 		});
 		this.plugin = this.$el.data('plugin_acompleter');
+		this.waitDelay = function( callback ) {
+			setTimeout( callback, this.plugin.options.delay + 100 );
+		};
 	},
 	teardown: function() {
-		console.log("Local data.teardown");
 		this.$fixture.find("input").acompleter("destroy");
 	}
 });
 
 
-asyncTest( "Loading of local data", function() {
+asyncTest( "minChars", function() {
 	var plugin = this.plugin;
-	expect( 1 );
+        self = this;
+    plugin.options.minChars = 3;
+    expect( 14 );
 
-	Syn.click( {}, "test-input" ).type("A\b");
+	Syn.click( {}, "test-input" ).type("J");
 
-	setTimeout(function() {
-		deepEqual( plugin.results, plugin.options.data, "Local data saved as results" );
-		start();
-	}, plugin.options.delay + 100 );
+	this.waitDelay(function() {
+		equal( plugin.results.length, 0, "Results are not loaded" );
+        equal( plugin._active, false, "Plugin is not active" );
+        equal( plugin.$results.find(">ul>li").length, 0, "Results are not displayed" );
+		ok( plugin.$results.is(":hidden"), "List is hidden" );
+        Syn.click( {}, "test-input" ).type("a");
+
+        self.waitDelay(function() {
+            equal( plugin.$elem.val(), "Ja", "kb ok" );
+            equal( plugin.results.length, 0, "Results are not loaded" );
+            equal( plugin._active, false, "Plugin is not active" );
+            equal( plugin.$results.find(">ul>li").length, 0, "Results are not displayed" );
+            ok( plugin.$results.is(":hidden"), "List is hidden" );
+
+            Syn.click( {}, "test-input" ).type("v");
+            self.waitDelay(function() {
+                equal( plugin.$elem.val(), "Jav", "kb ok" );
+                equal( plugin.results.length, 2, "Results are loaded" );
+                equal( plugin._active, true, "Plugin is not active" );
+                equal( plugin.$results.find(">ul>li").length, 2, "Results are displayed" );
+                ok( plugin.$results.is(":visible"), "List is visible" );
+                start();
+            });
+        });
+        
+
+	});
+
+
 });
-
-*/

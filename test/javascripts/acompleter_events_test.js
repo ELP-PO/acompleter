@@ -50,27 +50,100 @@ asyncTest( "Down arrow first time executes activate method", function() {
 	this.waitDelay(function() { start(); });	
 });
 
-/*
-asyncTest( "Up/Down arrow changing highlight element (.current)", function() {
+asyncTest( "Navigation and scroll down", function() {
+    var plugin = this.plugin;
+    plugin.options.listLength = 3;
+
+
+    var assertNavigation = function( index ) {
+        equal( plugin._current.index, index, "current position updated" );
+        equal( plugin._current.valueToCompare, localData[index], "current value updated" );
+        ok( plugin.getItems().eq(index).hasClass("current"), "highlight updated" );
+    };
+
+    // activate list
+	Syn.click( {}, "test-input" ).type("[down]");
+
+	this.waitDelay(function() {
+        deepEqual( plugin.results, localData, "data is loaded" );
+        equal( plugin.getItems().length, 3, "list length is correct" );
+        // select second item
+        Syn.type( "[down]", "test-input" );
+        setTimeout(function() {
+            assertNavigation( 1 );
+
+            // select third item
+            Syn.type( "[down]", "test-input" );
+            setTimeout(function() {
+                assertNavigation( 2 );
+                // select forth item (activate scroll)
+                Syn.type( "[down]", "test-input" );
+                setTimeout(function() {
+                    start();
+                    equal( plugin._current.index, 3, "current position updated" );
+                    equal( plugin._current.valueToCompare, localData[3], "current value updated" );
+                    ok( plugin.getItems().eq(2).hasClass("current"), "highlight third item" );
+                    equal( plugin.getItems().length, 3, "list length = 3" );
+                    equal( plugin.getItems().eq(0).text(), localData[1], "list scrolled" );
+                    equal( plugin.getItems().eq(2).text(), localData[3], "list scrolled" );
+                }, 10);
+            }, 10);
+        }, 10);
+    });	
+});
+
+
+asyncTest( "Navigation and scroll up", function() {
+    var plugin = this.plugin;
+    plugin.options.listLength = 3;
+
+
+    var assertCurrent = function( index ) {
+        equal( plugin._current.index, index, "current position updated" );
+        equal( plugin._current.valueToCompare, localData[index], "current value updated" );
+    };
+
+    // activate list
+	Syn.click( {}, "test-input" ).type("[down]");
+
+	this.waitDelay(function() {
+        deepEqual( plugin.results, localData, "data is loaded" );
+        equal( plugin.getItems().length, 3, "list length is correct" );
+        // scroll down 
+        Syn.type( "[down][down][down]", "test-input" );
+        setTimeout(function() {
+            assertCurrent( 3 );
+            ok( plugin.getItems().eq(2).hasClass("current"), "highlight third item" );
+
+            // move up to top of the list
+            Syn.type( "[up][up]", "test-input" );
+            setTimeout(function() {
+                assertCurrent( 1 );
+                ok( plugin.getItems().eq(0).hasClass("current"), "highlighted first item" );
+
+                // scroll up to first result
+                Syn.type( "[up]", "test-input" );
+                setTimeout(function() {
+                    start();
+                    assertCurrent( 0 );
+                    ok( plugin.getItems().eq(0).hasClass("current"), "highlighted first item" );
+                    equal( plugin.getItems().eq(0).text(), localData[0], "list scrolled" );
+                    equal( plugin.getItems().eq(2).text(), localData[2], "list scrolled" );
+                }, 100);
+            }, 100);
+        }, 100);
+    });	
+});
+
+
+asyncTest( "On blur hide results", function() {
     var plugin = this.plugin;
 
-//    Syn.click( {}, "test-input" ).type("
+    Syn.click( {}, "test-input" ).type( "[down]" );
 
+    this.waitDelay(function() {
+        deepEqual( plugin.results, localData, "data is loaded" );
+        ok( plugin.$results.is(":visible"), "results are shown" );
+        start();
+    });
 });
-    */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
