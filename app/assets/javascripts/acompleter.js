@@ -152,6 +152,9 @@
         this.$results = this.createList();
         $("body").append( this.$results );
 
+        this.$el.bind( "dblclick." + pluginName, function() {
+            self.activate();
+        });
         this.$el.bind( "blur." + pluginName, function(e) {
             if ( !self._ignoreBlur && !self.options._debug ) {
                 self.deactivate( true );

@@ -212,3 +212,20 @@ asyncTest( "Focus item by mouseover", function() {
         }, 10);
     });
 });
+
+
+asyncTest( "Activate plugin by double click", function() {
+    var plugin = this.plugin;
+
+    Syn.dblclick( {}, plugin.$el );
+    this.waitDelay(function() {
+        start();
+        deepEqual( plugin.results, localData, "data is loaded" );
+        ok( plugin.$results.is(":visible"), "results are shown" );
+        equal( plugin._active, true, "plugin is activated" );
+    });
+});
+
+
+
+
