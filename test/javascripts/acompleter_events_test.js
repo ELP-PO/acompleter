@@ -66,7 +66,7 @@ asyncTest( "Navigation and scroll down", function() {
 	Syn.click( {}, this.$el ).type("[down]");
 
 	this.waitDelay(function() {
-        deepEqual( self.plugin.results, localData, "data is loaded" );
+        equal( self.plugin.results.length, localData.length, "data is loaded" );
         equal( self.plugin.getItems().length, 3, "list length is correct" );
 
         // select second item
@@ -98,7 +98,7 @@ asyncTest( "Navigation and scroll up", function() {
 	Syn.click( {}, this.$el ).type("[down]");
 
 	this.waitDelay(function() {
-        deepEqual( self.plugin.results, localData, "data is loaded" );
+        equal( self.plugin.results.length, localData.length, "data is loaded" );
         equal( self.plugin.getItems().length, 3, "list length is correct" );
 
         // scroll down 
@@ -129,7 +129,7 @@ asyncTest( "Hide results when blur", function() {
     Syn.click( {}, this.$el ).type( "[down]" );
 
     this.waitDelay(function() {
-        deepEqual( plugin.results, localData, "data is loaded" );
+        equal( plugin.results.length, localData.length, "data is loaded" );
         ok( plugin.$results.is(":visible"), "results are shown" );
         equal( plugin._active, true, "plugin is activated" );
 
@@ -151,7 +151,7 @@ asyncTest( "Hide results when escape", function() {
     Syn.click( {}, this.$el ).type( "[down]" );
 
     this.waitDelay(function() {
-        deepEqual( plugin.results, localData, "data is loaded" );
+        equal( plugin.results.length, localData.length, "data is loaded" );
         ok( plugin.$results.is(":visible"), "results are shown" );
         equal( plugin._active, true, "plugin is activated" );
 
@@ -220,7 +220,7 @@ asyncTest( "Activate plugin by double click", function() {
     Syn.dblclick( {}, plugin.$el );
     this.waitDelay(function() {
         start();
-        deepEqual( plugin.results, localData, "data is loaded" );
+        equal( plugin.results.length, localData.length, "data is loaded" );
         ok( plugin.$results.is(":visible"), "results are shown" );
         equal( plugin._active, true, "plugin is activated" );
     });

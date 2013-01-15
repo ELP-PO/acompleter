@@ -7,10 +7,19 @@
  */
 var LiveReload;
 
-var resultsClassSelector = "." + $.Acompleter._defaults.resultsClass,
+var remoteData,
+    resultsClassSelector = "." + $.Acompleter._defaults.resultsClass,
     resultsIdSelector = "#" + $.Acompleter._defaults.resultsId,
+	remoteUrl = "/assets/remoteData.json",
     localData = [ "c++", "Java", "Php", "Coldfusion", "Javascript", "Asp",
                 "Ruby", "Python", "C", "Scala", "Groovy", "Haskell", "Perl" ];
+
+$.ajax( remoteUrl, {
+    success: function( data ) { remoteData = data; },
+    async: false
+});
+
+
 /*
  * Experimental assertion for comparing DOM objects.
  *

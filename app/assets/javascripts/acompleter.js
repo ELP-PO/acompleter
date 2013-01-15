@@ -23,12 +23,15 @@
             filter: null,
             sortResults: false,
             sortFunction: null,
+            lineSeparator: '\n',
+            cellSeparator: '|',
+            processData: null,
 
-            getValue: function( result ) { return result; },
+            getValue: function( result ) { return result.value; },
             /**
             * Returns value by which the plugin will compares result items with each other
             */
-            getComparableValue: function( result ) { return result; },
+            getComparableValue: function( result ) { return result.value; },
 
             _dummy: "just to be last item"
         };
@@ -41,8 +44,6 @@
      * @private
      */
     var sanitizeResult = function( result ) {
-        return result;
-        /*
         var value, data,
             type = typeof result;
         if ( type === 'string' ) {
@@ -63,7 +64,6 @@
             value: value,
             data: data
         };
-        */
     };
 
     /**
@@ -114,6 +114,31 @@
             return -1;
         }
         return 0;
+    };
+
+
+    /**
+     * Parse data received in text format
+     * @param {string} text Plain text input
+     * @param {string} lineSeparator String that separates lines
+     * @param {string} cellSeparator String that separates cells
+     * @returns {array} Array of autocomplete data objects
+     */
+    var plainTextParser = function(text, lineSeparator, cellSeparator) {
+        var results = [];
+        var i, j, data, line, value, lines;
+        // Be nice, fix linebreaks before splitting on lineSeparator
+        lines = String(text).replace('\r\n', '\n').split(lineSeparator);
+        for (i = 0; i < lines.length; i++) {
+            line = lines[i].split(cellSeparator);
+            data = [];
+            for (j = 0; j < line.length; j++) {
+                data.push(decodeURIComponent(line[j]));
+            }
+            value = data.shift();
+            results.push({ value: value, data: data });
+        }
+        return results;
     };
 
 
@@ -262,6 +287,9 @@
     $.Acompleter.prototype.fetchData = function( value ) {
         var self = this;
         var processResults = function( results, filter ) {
+            if ( $.isFunction( self.options.processData ) ) {
+                results = self.options.processData( results );
+            }
             self.results = self.filterResults( results, filter );
             self.updateCurrent();
             self.showResults();
@@ -279,19 +307,20 @@
     };
 
 
-    $.Acompleter.prototype.fetchRemoteData = function( value ) {
+    $.Acompleter.prototype.fetchRemoteData = function( value, callback ) {
         var data = this.cacheRead( value );
         if ( data ) {
-            this.processResults( value, data );
+            callback( data );
         } else {
-            var self = this,
-                ajaxCallback = function( data ) {
-                    if ( data.length ) {
-                        self.cacheWrite( value, data );
-                    }
-                    self.$el.removeClass( self.options.loadingClass );
-                    self.processResults( value, data );
-                };
+            var self = this;
+            var ajaxCallback = function( data ) {
+                if ( data.length ) {
+                    self.parseRemoteData( data );
+                    self.cacheWrite( value, data );
+                }
+                self.$el.removeClass( self.options.loadingClass );
+                callback( data );
+            };
 
             this.$el.addClass( this.options.loadingClass );
             $.ajax({
@@ -311,6 +340,30 @@
 
 
     /**
+     * Parse data received from server
+     * @param remoteData Data received from remote server
+     * @returns {array} Parsed data
+     */
+    $.Acompleter.prototype.parseRemoteData = function( remoteData ) {
+        var remoteDataType,
+            data = remoteData;
+        if ( this.options.remoteDataType === 'json' ) {
+            remoteDataType = typeof( remoteData );
+            switch ( remoteDataType ) {
+                case 'object':
+                    data = remoteData;
+                    break;
+                case 'string':
+                    data = $.parseJSON( remoteData );
+                    break;
+                default:
+                    $.error( "Unexpected remote data type: " + remoteDataType );
+            }
+            return data;
+        }
+        return plainTextParser(data, this.options.lineSeparator, this.options.cellSeparator);
+    };
+    /**
      * Default filter for results
      * @param {Object} result
      * @param {String} filter
@@ -318,12 +371,10 @@
      * @private
      */
     $.Acompleter.prototype.defaultFilter = function( result, filter ) {
-        /*
         if ( !result.value ) {
             return false;
         }
-        */
-        var testValue = result, //.value,
+        var testValue = result.value,
             pattern = filter;
         /*
         var pattern = this.matchStringConverter(filter);

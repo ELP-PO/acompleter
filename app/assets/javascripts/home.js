@@ -3,8 +3,15 @@ $(document).ready(function() {
 
 	
 $('#region').acompleter({
-    getValue: function(result) { return result.name; },
-    getComparableValue: function(result) { return result.name; }
+	url: "/assets/remoteData.json",
+	processData: function( loadedData ) {
+        return $.map( loadedData, function( result ) {
+            return {
+                value: result.name,
+                data: (function() { delete result.name; return result; })()
+            };
+        });
+    }
 }).focus();
 
 

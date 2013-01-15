@@ -28,6 +28,8 @@
 
 .results {
 	border: 1px dotted green;
+	position: absolute;
+	background: #fafafa;
 }
 
 .results ul {
