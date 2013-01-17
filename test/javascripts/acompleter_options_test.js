@@ -18,31 +18,20 @@ module( "Options", {
 asyncTest( "minChars", function() {
 	var plugin = this.plugin;
         self = this;
-    var assertInactive = function() {
-		equal( plugin.results.length, 0, "results are not loaded" );
-        equal( plugin._active, false, "plugin is not active" );
-        equal( plugin.getItems().length, 0, "results are not displayed" );
-		ok( plugin.$results.is(":hidden"), "list is hidden" );
-    };
-
     plugin.options.minChars = 3;
-    expect( 12 );
+    expect( 5 );
 
-	Syn.click( {}, plugin.$el ).type("J");
+	Syn.click( {}, plugin.$el ).type("Ja");
 
-	this.waitDelay(function() {
-        assertInactive();
-        Syn.type( "a", plugin.$el ); // typed: Ja
+    self.waitDelay(function() {
+        equal( plugin._active, false, "plugin is not active" );
+        Syn.type( "v", plugin.$el ); // typed Jav
         self.waitDelay(function() {
-            assertInactive();
-            Syn.type( "v", plugin.$el ); // typed Jav
-            self.waitDelay(function() {
-                start();
-                equal( plugin.results.length, 2, "results are loaded" );
-                equal( plugin._active, true, "plugin is not active" );
-                equal( plugin.getItems().length, 2, "results are displayed" );
-                ok( plugin.$results.is(":visible"), "list is visible" );
-            });
+            start();
+            equal( plugin._active, true, "plugin is active" );
+            equal( plugin.results.length, 2, "results are loaded" );
+            equal( plugin.getItems().length, 2, "results are displayed" );
+            ok( plugin.$results.is(":visible"), "list is visible" );
         });
-	});
+    });
 });

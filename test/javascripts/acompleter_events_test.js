@@ -27,15 +27,11 @@ asyncTest( "Ignore special & navigation keys", function() {
 	plugin.activate = function() { 
 		ok( false, "Activate method should not be executed" );
 	};
-	expect( 2 );
+	expect( 0 );
 	
 	Syn.click( {}, this.$el ).type( "[left][right][home][end][page-up][page-down][shift][insert][ctrl][alt][caps]" );
 
-	this.waitDelay(function() {
-		ok( plugin.results.length === 0, "Results are not loaded" );
-		ok( plugin.$results.is(":hidden"), "List is hidden" );
-		start();
-	});
+	this.waitDelay(function() { start(); });
 });
 
 asyncTest( "Up arrow first time executes activate method", function() {
@@ -79,12 +75,13 @@ asyncTest( "Navigation and scroll down", function() {
             })
             // select forth item (activate scroll)
             .then( "_type", "[down]", function() {
+                var items = self.plugin.getItems();
                 start();
                 self.assertCurrent( 3 );
-                ok( self.plugin.getItems().eq(2).hasClass("current"), "highlight third item" );
-                equal( self.plugin.getItems().length, 3, "list length = 3" );
-                equal( self.plugin.getItems().eq(0).text(), localData[1], "list scrolled" );
-                equal( self.plugin.getItems().eq(2).text(), localData[3], "list scrolled" );
+                ok( items.eq(2).hasClass("current"), "highlight third item" );
+                equal( items.eq(0).text(), localData[1], "list scrolled" );
+                equal( items.eq(2).text(), localData[3], "list scrolled" );
+                equal( items.length, 3, "list length = 3" );
             });
     });
 });
@@ -129,15 +126,12 @@ asyncTest( "Hide results when blur", function() {
     Syn.click( {}, this.$el ).type( "[down]" );
 
     this.waitDelay(function() {
-        equal( plugin.results.length, localData.length, "data is loaded" );
-        ok( plugin.$results.is(":visible"), "results are shown" );
         equal( plugin._active, true, "plugin is activated" );
 
         plugin.$el.blur();
 
         setTimeout(function() {
             start();
-            ok( plugin.$results.is(":hidden"), "results are hidden" );
             equal( plugin._active, false, "plugin is deactivated" );
         }, 10);
 
@@ -151,23 +145,22 @@ asyncTest( "Hide results when escape", function() {
     Syn.click( {}, this.$el ).type( "[down]" );
 
     this.waitDelay(function() {
-        equal( plugin.results.length, localData.length, "data is loaded" );
-        ok( plugin.$results.is(":visible"), "results are shown" );
         equal( plugin._active, true, "plugin is activated" );
 
         Syn.type( "[escape]", plugin.$el, function() {
             start();
-            ok( plugin.$results.is(":hidden"), "results are hidden" );
             equal( plugin._active, false, "plugin is deactivated" );
         });
     });
 });
+
 
 asyncTest( "Select current on enter", function() {
     var plugin = this.plugin;
 
     // activate list
     Syn.click( {}, plugin.$el ).type("[down]");
+
     this.waitDelay(function() {
         // navigate to fifth item
         Syn.type( "[down][down][down][down]", plugin.$el, function() {
@@ -188,6 +181,7 @@ asyncTest( "Select item by click", function() {
 
     // activate list
     Syn.click( {}, plugin.$el ).type("[down]");
+    
     this.waitDelay(function() {
         // click to the fifth item
         Syn.click( {}, plugin.getItems().eq(4), function() {
@@ -204,6 +198,7 @@ asyncTest( "Focus item by mouseover", function() {
 
     // activate list
     Syn.click( {}, self.$el ).type("[down]");
+
     this.waitDelay(function() {
         self.plugin.getItems().eq(4).trigger("mouseover");
         setTimeout(function() {
@@ -218,14 +213,10 @@ asyncTest( "Activate plugin by double click", function() {
     var plugin = this.plugin;
 
     Syn.dblclick( {}, plugin.$el );
+
     this.waitDelay(function() {
         start();
         equal( plugin.results.length, localData.length, "data is loaded" );
-        ok( plugin.$results.is(":visible"), "results are shown" );
         equal( plugin._active, true, "plugin is activated" );
     });
 });
-
-
-
-

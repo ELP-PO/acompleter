@@ -26,6 +26,7 @@
             lineSeparator: '\n',
             cellSeparator: '|',
             processData: null,
+            showResult: null,
 
             getValue: function( result ) { return result.value; },
             /**
@@ -632,19 +633,28 @@
     }; // createList
 
 
+    $.Acompleter.prototype.showResult = function( query, result ) {
+        if ( $.isFunction(this.options.showResult) ) {
+            return this.options.showResult( query, result );
+        } else {
+            // TODO: escape processed value to safly use in RegEx
+            var pattern = new RegExp(
+                ( this.options.matchInside ? "" : "^" ) + query,
+                ( this.options.matchCase ? "" : "i" )
+            );
+            return result.value.replace( pattern, "<span>$&</span>" );
+        }
+    }; // showResult
+
+
     $.Acompleter.prototype.createListItem = function( index ) {
         var $li,
             self = this,
-            result = this.results[ index ],
-            // TODO: escape processed value to safly use in RegEx
-            pattern = new RegExp(
-                ( this.options.matchInside ? "" : "^" ) + this._lastProcessedValue,
-                "i"
-            );
+            result = this.results[ index ];
         // TODO: figure out what to do when `getValue` appends text
         //       which trigger math against `_lastProcessedValue`
         $li = $("<li></li>")
-            .html( this.options.getValue(result).replace( pattern, "<span>$&</span>" ) )
+            .html( this.showResult(this._lastProcessedValue, result) )
             .data( "valueToCompare", this.options.getComparableValue(result) )
             .data( "index", index );
         $li.click(function() { self.selectItem( $li ); })

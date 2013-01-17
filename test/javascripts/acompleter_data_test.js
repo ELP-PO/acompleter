@@ -1,6 +1,5 @@
 module( "Local data", {
 	setup: function() {
-		console.log("Local data.setup");
 		this.$fixture = $("#qunit-fixture");
 		this.$el = this.$fixture.find("#test-input").acompleter({
 			data: localData,
@@ -12,7 +11,6 @@ module( "Local data", {
 		};
 	},
 	teardown: function() {
-		console.log("Local data.teardown");
 		this.$fixture.find("input").acompleter("destroy");
 	}
 });
@@ -81,4 +79,3 @@ asyncTest( "Remote data loaded and ready to parse", function() {
     expect( 1 );
     self.plugin.activate();
 });
-
