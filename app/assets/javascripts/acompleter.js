@@ -27,8 +27,10 @@
             cellSeparator: '|',
             processData: null,
             showResult: null,
+            animation: true,
+            animationSpeed: 177,
+            //animationSpeed: 5000,
 
-            getValue: function( result ) { return result.value; },
             /**
             * Returns value by which the plugin will compares result items with each other
             */
@@ -37,6 +39,19 @@
             _dummy: "just to be last item"
         };
 
+
+    // helper function
+    var prepareToAnimation = function( $item ) {
+        $item.data({
+                height: $item.height(),
+                opacity: $item.css( "opacity" )
+            })
+            .css({
+                height: 0,
+                opacity: 0,
+                display: "none"
+            });
+    };
 
     /**
      * Sanitize result
@@ -547,29 +562,44 @@
         // Prepend new items before and between existing items
         //
         (function() {
-            var i, r, itemString, resultString, $item,
-                $restItems = $items.filter( ":not(." + removeMarkClass + ")" ),
-                min = scrollTop;
-            for ( i = 0; i < $restItems.length; i++ ) {
-                itemString = $restItems.eq( i ).text();
-                for ( r = min; r < scrollBottom; r++ ) {
-                    resultString = self.results[ r ].name;
-                    if ( resultString < itemString ) {
-                        $item = self.createListItem( r );
-                        $item.addClass( appendMarkClass );
-                        $restItems.eq( i ).before( $item );
-                    } else {
-                        // Recreate existing items for sake of update highlighted value and
-                        // index of corresponding data in the results array
-                        if ( resultString === itemString ) {
+            var i, r,
+                $restItems = $items.filter( ":not(." + removeMarkClass + ")" );
+            // reindex items
+            (function() {
+                var itemValue, resultValue, $item,
+                    min = scrollTop;
+                for ( i = 0; i < $restItems.length; i++ ) {
+                    itemValue = $restItems.eq( i ).data( "valueToCompare" );
+                    for ( r = min; r < scrollBottom; r++ ) {
+                        resultValue = self.options.getComparableValue( self.results[ r ] );
+                        if ( resultValue === itemValue ) {
                             $item = self.createListItem( r );
                             $restItems.eq( i ).replaceWith( $item );
+                            min = r + 1;
+                            break;
                         }
-                        min = r + 1;
-                        break;
                     }
                 }
-            }
+            }());
+
+            // prepend items
+            (function( $restItems ) {
+                var itemIndex, 
+                    maxItemIndex = $restItems.last().data('index');
+                for ( r = scrollTop, i = 0; r < maxItemIndex; r++ ) {
+                    itemIndex = $restItems.eq( i ).data('index');
+                    if (r < itemIndex) {
+                        $item = self.createListItem( r );
+                        $restItems.eq( i ).before( $item );
+                        if ( self.options.animation ) {
+                            prepareToAnimation( $item );
+                        }
+                        $item.addClass( appendMarkClass );
+                    } else {
+                        i++;
+                    }
+                }
+            }( self.getItems(":not(." + removeMarkClass + ")") ));
         }());
 
         // Append rest of the items to populate list
@@ -578,14 +608,43 @@
             var i, $item;
             for ( i = scrollTop + $ul.find( "li:not(." + removeMarkClass + ")" ).length; i < scrollBottom; i++ ) {
                 $item = self.createListItem( i );
-                $item.addClass( appendMarkClass );
                 $ul.append( $item );
+                if ( self.options.animation ) {
+                    prepareToAnimation( $item );
+                }
+                $item.addClass( appendMarkClass );
             }
         }());
 
 
         if ( this.options.animation ) {
-            alert("animation here");
+            // start to remove items
+            //
+            this.getItems( "." + removeMarkClass )
+                // cancel animationa of the items marked to append
+                .stop().removeClass( appendMarkClass )
+                // start animation of the items marked to remove
+                .animate({
+                    opacity: 0,
+                    height: "hide"
+                }, this.options.animationSpeed, function() {
+                    $( this ).remove();
+                });
+
+            // start to append items
+            //
+            this.getItems( "." + appendMarkClass )
+                .show()
+                .each(function() {
+                    // each item can have its own height
+                    var $this = $( this );
+                    $this.animate({
+                        opacity: $this.data("opacity"),
+                        height: $this.data("height") + "px"
+                    }, self.options.animationSpeed, function() {
+                        $this.removeClass( appendMarkClass );
+                    });
+                });
         } else {
             this.getItems( "." + removeMarkClass ).remove();
             this.getItems( "." + appendMarkClass ).removeClass( appendMarkClass );

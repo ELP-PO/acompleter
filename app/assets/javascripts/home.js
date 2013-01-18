@@ -4,6 +4,7 @@ $(document).ready(function() {
 	
 $('#region').acompleter({
 	url: "/assets/remoteData.json",
+	animation: true,
 	processData: function( loadedData ) {
         return $.map( loadedData, function( result ) {
             return {
