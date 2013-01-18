@@ -505,30 +505,39 @@
         }
         var self = this,
             $ul = this.$results.children("ul"),
-            $items = $ul.children("li"),
+            $items = this.getItems(),
             scrollTop = Math.max( 0, this._current.index - this.options.listLength + 1 ),
             scrollBottom = Math.min( scrollTop + this.options.listLength, this.results.length ),
             removeMarkClass = "_remove_mark_" + pluginName,
             appendMarkClass = "_append_mark_" + pluginName;
 
-        // Mark items that  be removed
+        this.showList();
+
+        // Mark items that will be removed
         //
         (function() {
-            var i, r, remove, itemString, resultString,
+            var i, r, remove, itemValue, resultValue,
                 max = scrollBottom;
             for ( i = $items.length; i--; i ) {
-                itemString = $items.eq( i ).text();
+                itemValue = $items.eq( i ).data( "valueToCompare" );
                 remove = true;
-                // Search itemString inside results
+                // Search itemValue inside results
                 for ( r = scrollTop; r < max; r++ ) {
-                    resultString = self.results[ r ].name;
-                    if ( resultString >= itemString ) {
-                        remove = resultString > itemString;
+                    resultValue = self.options.getComparableValue( self.results[ r ] );
+
+                    if ( self.options.sortResult ) {
+                        if ( resultValue >= itemValue ) {
+                            remove = resultValue > itemValue;
+                            max = r;
+                            break;
+                        }
+                    } else if ( resultValue == itemValue ) {
+                        remove = false;
                         max = r;
                         break;
                     }
                 }
-                // If itemString is not found mark it to be removed
+                // If itemValue is not found mark it to be removed
                 if ( remove ) {
                     $items.eq( i ).addClass( removeMarkClass );
                 }
@@ -574,20 +583,19 @@
             }
         }());
 
+
         if ( this.options.animation ) {
             alert("animation here");
         } else {
-            $ul.find( "." + removeMarkClass ).remove();
-            this.highlightCurrent();
-            this.showList();
+            this.getItems( "." + removeMarkClass ).remove();
+            this.getItems( "." + appendMarkClass ).removeClass( appendMarkClass );
         }
+        this.highlightCurrent();
         this._active = true;
-        //console.log("showResults end");
     }; // showResults
 
 
     $.Acompleter.prototype.highlightCurrent = function() {
-        //console.log("highlightCurrent start");
         var index = this._current.index,
             currentClass = this.options.currentClass;
         this.getItems().each(function() {
@@ -598,7 +606,6 @@
                 $this.removeClass( currentClass );
             }
         });
-        //console.log("highlightCurrent end");
     }; // highlightCurrent
 
 
@@ -694,6 +701,7 @@
 
 
     $.Acompleter.prototype.selectItem = function($li) {
+        // TODO: select another value. `valueToCompare` only for compare
         var value = $li.data("valueToCompare");
         this.deactivate( true );
         this.$el.val( value );
