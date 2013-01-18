@@ -29,6 +29,7 @@
             showResult: null,
             animation: true,
             animationSpeed: 177,
+            highlight: true,
             //animationSpeed: 5000,
 
             /**
@@ -699,28 +700,45 @@
     }; // createList
 
 
-    $.Acompleter.prototype.showResult = function( query, result ) {
+    /*
+       формирует содержимое тэга <li> в списке результатов
+       может быть любым ХТМЛ
+       */
+    $.Acompleter.prototype.showResult = function( value, result ) {
         if ( $.isFunction(this.options.showResult) ) {
-            return this.options.showResult( query, result );
-        } else {
-            // TODO: escape processed value to safly use in RegEx
-            var pattern = new RegExp(
-                ( this.options.matchInside ? "" : "^" ) + query,
-                ( this.options.matchCase ? "" : "i" )
-            );
-            return result.value.replace( pattern, "<span>$&</span>" );
+            return this.options.showResult( value, result );
         }
+        return value;
     }; // showResult
 
+    /* 
+       выделяет query внутри value тэгами
+    */
+    $.Acompleter.prototype.defaultHighlight = function( query, value ) {
+        // TODO: escape processed value to safly use in RegEx
+        var pattern = new RegExp(
+            ( this.options.matchInside ? "" : "^" ) + query,
+            ( this.options.matchCase ? "" : "i" )
+        );
+        return value.replace( pattern, "<span class=\"hl\">$&</span>" );
+    }; // defaultHighlight
 
     $.Acompleter.prototype.createListItem = function( index ) {
-        var $li,
+        var $li, value,
             self = this,
-            result = this.results[ index ];
-        // TODO: figure out what to do when `getValue` appends text
-        //       which trigger math against `_lastProcessedValue`
+            result = this.results[ index ],
+            value = result.value;
+
+        if ( this.options.highlight === true ) {
+            value = this.defaultHighlight( this._lastProcessedValue, result.value );
+        } else if ( $.isFunction(this.options.highlight) ) {
+            value = this.options.highlight( this._lastProcessedValue, result.value );
+        } else {
+            value = result.value;
+        }
+
         $li = $("<li></li>")
-            .html( this.showResult(this._lastProcessedValue, result) )
+            .html( this.showResult(value, result) )
             .data( "valueToCompare", this.options.getComparableValue(result) )
             .data( "index", index );
         $li.click(function() { self.selectItem( $li ); })

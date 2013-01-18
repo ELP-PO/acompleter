@@ -21,6 +21,6 @@ asyncTest( "Highlight query inside query", function() {
 
     this.waitDelay(function() {
         start();
-        equal( plugin.getCurrentItem().html(), "Jav<span>asc</span>ript", "query highlighted" );
+        equal( plugin.getCurrentItem().html(), "Jav<span class=\"hl\">asc</span>ript", "query highlighted" );
     });
 });
