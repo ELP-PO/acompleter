@@ -11,6 +11,7 @@
             url: "/kladr/list.json",
             remoteDataType: "json",
             loadingClass: "loading",
+            onItemSelect: null,
             resultsClass: "results",
             resultsId: pluginName + "-results",
             currentClass: "current",
@@ -261,6 +262,22 @@
         }
         this.$el.removeData( "plugin_" + pluginName );
     }; // destroy
+
+
+    /**
+     * Call hook
+     * Note that all called hooks are passed the autocompleter object
+     * @param {string} hook
+     * @param data
+     * @returns Result of called hook, false if hook is undefined
+     */
+    $.Acompleter.prototype.callHook = function( hook, data ) {
+        var f = this.options[ hook ];
+        if ( f && $.isFunction(f) ) {
+            return f( data, this );
+        }
+        return false;
+    };
 
 
     $.Acompleter.prototype.activate = function() {
@@ -777,12 +794,12 @@
     };
 
 
-    $.Acompleter.prototype.selectItem = function($li) {
-        // TODO: select another value. `valueToCompare` only for compare
-        var value = $li.data("valueToCompare");
+    $.Acompleter.prototype.selectItem = function( $li ) {
+        var selected = this.results[ $li.data("index") ];
+        this.$el.val( selected.value );
         this.deactivate( true );
-        this.$el.val( value );
         this.$el.focus();    
+        this.callHook( "onItemSelect", selected );
     };
 
 

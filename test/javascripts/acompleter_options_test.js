@@ -16,7 +16,7 @@ module( "Options", {
 
 
 asyncTest( "minChars", function() {
-	var plugin = this.plugin;
+	var plugin = this.plugin,
         self = this;
     plugin.options.minChars = 3;
     expect( 5 );
@@ -33,5 +33,24 @@ asyncTest( "minChars", function() {
             equal( plugin.getItems().length, 2, "results are displayed" );
             ok( plugin.$results.is(":visible"), "list is visible" );
         });
+    });
+});
+
+asyncTest( "onItemSelect", function() {
+	var plugin = this.plugin;
+
+    plugin.options.onItemSelect = function( result, plugin_ ) {
+        start();
+        deepEqual( result, { value: "Javascript", data: {} }, "correct result provided" );
+        equal( plugin_, plugin, "plugin instance provided" );
+    };
+    expect( 2 );
+
+    // activate list
+    Syn.click( {}, plugin.$el ).type("[down]");
+
+    this.waitDelay(function() {
+        // navigate to fifth item and select it
+        Syn.type( "[down][down][down][down]\r", plugin.$el );
     });
 });
