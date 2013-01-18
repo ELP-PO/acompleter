@@ -1,5 +1,6 @@
 Acompleter::Application.routes.draw do
   get "kladr/list"
+  get "kladr/form"
 
   get "home/index"
 

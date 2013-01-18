@@ -12,16 +12,16 @@
  *= require_tree .
  */
 
-#local,
-#region {
+#demo #local,
+#demo #region {
 	font-size: 56px;
 	float: right;
 	margin-right: 20px;
 }
 
 
-#local.loading,
-#region.loading {
+#demo #local.loading,
+#demo #region.loading {
 	background-image: url(/assets/spinner.gif);
 }
 

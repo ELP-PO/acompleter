@@ -11,4 +11,10 @@ class KladrController < ApplicationController
       format.json { render :json => @items }
     end
   end
+  
+  def form
+    respond_to do |format|
+      format.html # form.html.erb
+    end
+  end
 end

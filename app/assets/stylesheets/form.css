@@ -1,0 +1,12 @@
+#form input {
+	font-size: 40px;
+	width: 800px;
+}
+
+#form label {
+	font-size: 30px;
+}
+
+#form input.disabled {
+	background: #eee;
+}
