@@ -13,7 +13,6 @@ module( "Setup", {
 test( "Plugin is created propertly", function() {
 	strictEqual( this.$el.data("plugin_acompleter"), undefined, "plugin is not initialized" );
 	strictEqual( $(resultsClassSelector).length, 0, "results element is absent (check by class)" );
-	strictEqual( $(resultsIdSelector).length, 0, "results element is absent (check by id)" );
 	
 	this.$el.acompleter();
 	
@@ -21,7 +20,7 @@ test( "Plugin is created propertly", function() {
 	ok( plugin, "plugin instance is attached to element's data" );
 	ok( plugin instanceof $.Acompleter, "plugin is instance of $.Acompleter" );
 	strictEqual( plugin.$el.get(0), this.$el.get(0), "plugin element is attached propertly" );
-	strictEqual( plugin.$results.get(0), $(resultsIdSelector).get(0), "plugin results list is created" );
+	strictEqual( plugin.$results.get(0), $(resultsIdSelector + plugin.uid).get(0), "plugin results list is created" );
 	strictEqual( $(resultsClassSelector).length, 1, "plugin results list is only one" );
 });
 
@@ -38,22 +37,17 @@ test( "Plugin is destroyed propertly", function() {
 		$inputs.acompleter().acompleter( "destroy" );
 	}, "Two instances, clear element" );
 	equal( $( resultsClassSelector ).length, 0, "Two instances, results removed" );
-	
-	$inputs.eq(0).acompleter();
-	domEqual( $inputs.eq(1), function() {
-		$inputs.eq(1).acompleter().acompleter( "destroy" );
-	}, "One of two instances, clear element" );
-	equal( $( resultsClassSelector ).length, 1, "One of two instances, results did't removed" );
 });
 
-test( "Many plugins share one results element", function() {
+test( "Many plugins have individual results element", function() {
 	this.$fixture.append( "<input>" ).append( "<input>" );
 	strictEqual( $(resultsClassSelector).length, 0, "results element is absent (check by class)" );
 	
 	this.$fixture.find("input").acompleter();
 	
-	strictEqual( $(resultsClassSelector).length, 1, "results element is only one" );
+	strictEqual( $(resultsClassSelector).length, 3, "results element is only one" );
 });
+
 
 test( "Plugin is chained propertly", function() {
 	this.$fixture.append( "<input>" );

@@ -6,6 +6,7 @@
 ;(function( $, undefined ) {
 
     var pluginName = 'acompleter',
+        uuid = 0,
         defaults = {
             delay: 400, // specifies the amount of time to wait for displaying data between each key press
             url: "/kladr/list.json",
@@ -13,7 +14,7 @@
             loadingClass: "loading",
             onItemSelect: null,
             resultsClass: "results",
-            resultsId: pluginName + "-results",
+            resultsId: pluginName + "-results-", // + uid (plugin uid will append here)
             currentClass: "current",
             onError: undefined,
             beforeUseConverter: null,
@@ -169,6 +170,7 @@
                     + ", jQuery object with one element with INPUT tag expected.");
         }
 
+        this.uid = ++uuid;
         this.options = $.extend( {}, defaults, options );
         // from boilerplate, but don't know for what
         //this._defaults = defaults;
@@ -255,11 +257,7 @@
 
     $.Acompleter.prototype.destroy = function() {
         this.$el.unbind( "." + pluginName );
-        if ( this.$results.data("instances") == 1 ) {
-            this.$results.remove();
-        } else {
-            this.$results.data( "instances", this.$results.data("instances") - 1 );
-        }
+        this.$results.remove();
         this.$el.removeData( "plugin_" + pluginName );
     }; // destroy
 
@@ -704,16 +702,11 @@
 
 
     $.Acompleter.prototype.createList = function() {
-        var $results = $( "#" + this.options.resultsId );
-        if ( !$results.length ) {
-            $results = $( "<div></div>", { id: this.options.resultsId } )
-                .hide()
-                .addClass( this.options.resultsClass )
-                .css( { position: "absolute" } )
-                .append( $("<ul></ul>") );
-        }
-        $results.data( 'instances' , ($results.data("instances") || 0) + 1 );
-        return $results;
+        return $( "<div></div>", { id: this.options.resultsId + this.uid } )
+            .hide()
+            .addClass( this.options.resultsClass )
+            .css( { position: "absolute" } )
+            .append("<ul></ul>");
     }; // createList
 
 
