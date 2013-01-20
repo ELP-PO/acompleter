@@ -14,7 +14,6 @@ module( "Setup", {
 test( "Plugin is created propertly", function() {
 	strictEqual( this.$el.data("plugin_acompleter"), undefined, "plugin is not initialized" );
 	strictEqual( $(this.resultsClassSelector).length, 0, "results element is absent (check by class)" );
-	strictEqual( $(this.resultsIdSelector).length, 0, "results element is absent (check by id)" );
 	
 	this.$el.acompleter();
 	
@@ -22,17 +21,16 @@ test( "Plugin is created propertly", function() {
 	ok( plugin, "plugin instance is attached to element's data" );
 	ok( plugin instanceof $.Acompleter, "plugin is instance of $.Acompleter" );
 	strictEqual( plugin.$elem.get(0), this.$el.get(0), "plugin element is attached propertly" );
-	strictEqual( plugin.$results.get(0), $(this.resultsIdSelector).get(0), "plugin results list is created" );
+	strictEqual( plugin.$results.get(0), $(this.resultsIdSelector + plugin.uid).get(0), "plugin results list is created" );
 	strictEqual( $(this.resultsClassSelector).length, 1, "plugin results list is only one" );
 });
 
-test( "Many plugins share one results element", function() {
+test( "Many plugins have individual results element", function() {
 	$( "#qunit-fixture" ).append( "<input>" ).append( "<input>" );
 	strictEqual( $(this.resultsClassSelector).length, 0, "results element is absent (check by class)" );
-	
 	$( "#qunit-fixture input" ).acompleter();
-	
-	strictEqual( $(this.resultsClassSelector).length, 1, "results element is only one" );
+
+	strictEqual( $(this.resultsClassSelector).length, 3, "every plugin has own results element" );
 });
 
 

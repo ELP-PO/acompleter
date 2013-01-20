@@ -6,13 +6,14 @@
 ;(function( $, undefined ) {
 
     var pluginName = 'acompleter',
+        uuid = 0,
         defaults = {
             delay: 400, // specifies the amount of time to wait for displaying data between each key press
             url: "/kladr/list.json",
             remoteDataType: "json",
             loadingClass: "loading",
             resultsClass: "results",
-            resultsId: "acompleter-results",
+            resultsId: pluginName + "-results-", // + uid (plugin uid will append here)
             currentClass: "current",
             onError: undefined,
             listLength: 10,
@@ -62,6 +63,7 @@
             throw new Error('Invalid parameter for jquery.Acompleter, jQuery object with one element with INPUT tag expected.');
         }
 
+        this.uid = ++uuid;
         this.options = $.extend( {}, defaults, options );
         // from boilerplate, but don't know for what
         //this._defaults = defaults;
@@ -340,15 +342,11 @@
 
 
     $.Acompleter.prototype.createList = function() {
-        var $results = $( "#" + this.options.resultsId );
-        if ( !$results.length ) {
-            $results = $( "<div></div>", { id: this.options.resultsId } )
-                .hide()
-                .addClass( this.options.resultsClass )
-                .css( { position: "absolute" } )
-                .append( $("<ul></ul>") );
-        }
-        return $results;
+        return $results = $( "<div></div>", { id: this.options.resultsId + this.uid } )
+            .hide()
+            .addClass( this.options.resultsClass )
+            .css( { position: "absolute" } )
+            .append("<ul></ul>");
     }; // createList
 
 
