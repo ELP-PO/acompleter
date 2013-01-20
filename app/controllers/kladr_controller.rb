@@ -4,6 +4,8 @@ class KladrController < ApplicationController
       @items = get_states(params[:q])
     elsif params[:code].length == 2 # state provided
       @items = get_districts(params[:code], params[:q])
+    elsif params[:code].length == 5 # city provided
+      @items = get_cities(params[:code], params[:q])
     end
     
     respond_to do |format|
@@ -32,6 +34,13 @@ class KladrController < ApplicationController
       q = ""
     end
     return Kladr.where("code like concat(?, '___00000000') AND code <> concat(?, '00000000000') AND name like concat('%', concat(?, '%'))", code, code, q).order("name")
+  end
+  
+  def get_cities(code, q = "")
+    if q.nil?
+      q = ""
+    end
+    return Kladr.where("code like concat(?, '___00000') AND code <> concat(?, '00000000000') AND name like concat('%', concat(?, '%'))", code, code, q).order("name")
   end
 
 end

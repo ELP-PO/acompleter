@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	
-	var processKladrData = function( loadedData ) {
+	var processData = function( loadedData ) {
         return $.map( loadedData, function( result ) {
             return {
                 value: result.name,
@@ -8,28 +8,48 @@ $(document).ready(function() {
             };
         });
 	};
-	var showKladrResult = function( value, result ) {
+	var showResult = function( value, result ) {
 		return value + " " + result.data.socr;
 	};
-	
-	
-	
-	$( "#district, #city, #locality, #street" ).attr( "disabled", "disabled" ).addClass("disabled");
+	var displayValue = function( result ) {
+		return result.value + " " + result.data.socr;
+	};
+	var initAcompleter = function( $el ) {
+		$el.acompleter({
+				processData: processData,
+				showResult: showResult,
+				displayValue: displayValue
+			})
+	};
+	var updateAcompleter = function( $el, code ) {
+		$el.data("plugin_acompleter").options.url = "/kladr/list.json?code=" + code;
+		$el.removeAttr("disabled")
+			.removeClass("disabled")
+			.val("")
+			.focus();
+	};
 
-	$( "#state" ).acompleter({
+	$("#state").acompleter({
 		url: "/kladr/list.json",
-		processData: processKladrData,
-		showResult: showKladrResult,
+		processData: processData,
+		showResult: showResult,
+		displayValue: displayValue,
 		onItemSelect: function( result, plugin ) {
 			var code = result.data.code.substr(0, 2);
-			$("#district").data("plugin_acompleter").options.url = "/kladr/list.json?code=" + code;
-			$("#district").removeAttr("disabled").removeClass("disabled").focus();
+			updateAcompleter( $("#district"), code );
 		}
 	}).focus();
+	
+	$("#district, #city, #locality, #street").attr( "disabled", "disabled" ).addClass("disabled").each(function() {
+		initAcompleter( $(this) );
+	})
+	
+	$("#district").data("plugin_acompleter").options.onItemSelect = function( result, plugin ) {
+		var code = result.data.code.substr( 0, 5 );
+		updateAcompleter( $("#city"), code );
+	}
+	
 
-	$( "#district" ).acompleter({
-		processData: processKladrData,
-		showResult: showKladrResult
-	});
+
 	
 });
