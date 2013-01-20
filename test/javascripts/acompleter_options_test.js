@@ -54,3 +54,22 @@ asyncTest( "onItemSelect", function() {
         Syn.type( "[down][down][down][down]\r", plugin.$el );
     });
 });
+
+asyncTest( "displayValue", function() {
+	var plugin = this.plugin;
+
+    plugin.options.displayValue = function( result ) {
+        return "==" + result.value + "==";
+    };
+
+    // activate list
+    Syn.click( {}, plugin.$el ).type("[down]");
+
+    this.waitDelay(function() {
+        // navigate to fifth item (Javascript) and select it
+        Syn.type( "[down][down][down][down]\r", plugin.$el, function() {
+            start();
+            equal( plugin.$el.val(), "==Javascript==", "display value is valid" );
+        });
+    });
+});

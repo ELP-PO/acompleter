@@ -32,6 +32,7 @@
             animation: true,
             animationSpeed: 177,
             highlight: true,
+            displayValue: null,
             //animationSpeed: 5000,
 
             /**
@@ -796,10 +797,18 @@
 
     $.Acompleter.prototype.selectItem = function( $li ) {
         var selected = this.results[ $li.data("index") ];
-        this.$el.val( selected.value );
+        this.$el.val( this.displayValue(selected) );
         this.deactivate( true );
         this.$el.focus();    
         this.callHook( "onItemSelect", selected );
+    };
+
+
+    $.Acompleter.prototype.displayValue = function( selected ) {
+        if ( $.isFunction(this.options.displayValue) ) {
+            return this.options.displayValue( selected );
+        }
+        return selected.value;
     };
 
 
