@@ -1,13 +1,16 @@
+var resultsClassSelector = "." + $.Acompleter._defaults.resultsClass,
+    resultsIdSelector = "#" + $.Acompleter._defaults.resultsId;
+
 // Test proper initialization which appears at the start of the page without user interaction
 module( "Setup", {
 	setup: function() {
-		this.$el = $( "#test-input" );
-		this.resultsClassSelector = "." + $.Acompleter._defaults.resultsClass;
-		this.resultsIdSelector = "#" + $.Acompleter._defaults.resultsId;
+		console.log("Setup.setup");
+		this.$fixture = $("#qunit-fixture");
+		this.$el = this.$fixture.find("#test-input");
 	},
 	teardown: function() {
-		$(this.resultsClassSelector).remove();
-		$(this.resultsIdSelector).remove();
+		console.log("Setup.teardown");
+		this.$fixture.find("input").acompleter("destroy");
 	}
 });
 
@@ -25,6 +28,24 @@ test( "Plugin is created propertly", function() {
 	strictEqual( $(this.resultsClassSelector).length, 1, "plugin results list is only one" );
 });
 
+test( "Plugin is destroyed propertly", function() {
+	expect( 7 );
+
+	domEqual( "#test-input", function() {
+		$( "#test-input" ).acompleter().acompleter( "destroy" );
+	}, "One instance, clear element" );
+	equal( $( resultsClassSelector ).length, 0, "One instance, results removed" );
+	
+	$("#qunit-fixture").append("<input>");
+	$inputs = $("#qunit-fixture input");
+	equal( $inputs.length, 2, "Two instances" );
+	domEqual( $inputs, function() {
+		$inputs.acompleter().acompleter( "destroy" );
+	}, "Two instances, clear element" );
+	equal( $( resultsClassSelector ).length, 0, "Two instances, results removed" );
+	
+});
+
 test( "Many plugins have individual results element", function() {
 	$( "#qunit-fixture" ).append( "<input>" ).append( "<input>" );
 	strictEqual( $(this.resultsClassSelector).length, 0, "results element is absent (check by class)" );
@@ -35,31 +56,101 @@ test( "Many plugins have individual results element", function() {
 
 
 test( "Plugin is chained propertly", function() {
-	$( "#qunit-fixture" ).append( "<input>" );
-	$elements = $( "#qunit-fixture input" );
+	this.$fixture.append( "<input>" );
+	var $elements = $( "#qunit-fixture input" );
 	deepEqual( $elements.acompleter(), $elements, "plugin is chained" );
 });
 
-// Human interaction tests
-module( "Acompleter", {
+test( "Options is loaded propertly", function() {
+	var defaults = $.Acompleter._defaults;
+	var options = {
+		bla_bla_bla: "bla-bla-bla",
+		data: [ "local", "data" ],
+		listLength: 0,
+    	minChars: 100,
+    	matchInside: false
+	};
+	
+	deepEqual(
+		this.$el.acompleter(options).data("plugin_acompleter").options,
+		$.extend( {}, defaults, options ),
+		"plugin options is defaults + passed options"
+	);
+});
+
+module( "Keyboard interaction", {
 	setup: function() {
-		this.$el = $( "#test-input" ).acompleter();
+		console.log("Keyboard interaction.setup");
+		this.$fixture = $("#qunit-fixture");
+		this.$el = this.$fixture.find("#test-input").acompleter();
 		this.plugin = this.$el.data('plugin_acompleter');
-		this.resultsClass = $.Acompleter._defaults.resultsClass;
-		this.resultsId = $.Acompleter._defaults.resultsId;
-		this.localData = [ "Acompleter", "Belsky", "Handmade", "Javascript", "QUnit", "JQuery", "May", "All", "Beings", "Be", "Happy" ];
+		this.waitDelay = function( callback ) {
+			setTimeout( callback, this.plugin.options.delay + 100 );
+		};
 	},
 	teardown: function() {
-		$(this.resultsClassSelector).remove();
-		$(this.resultsIdSelector).remove();
+		console.log("Keyboard interaction.teardown");
+		this.$fixture.find("input").acompleter("destroy");
+	}
+});
+
+asyncTest( "Ignore special & navigation keys", function() {
+	var plugin = this.plugin;	
+	plugin.activate = function() { 
+		ok( false, "Activate method should not be executed" );
+	};
+	expect( 2 );
+	
+	Syn.click( {}, "test-input" ).type( "[left][right][home][end][page-up][page-down][shift][insert][ctrl][alt][caps]" );
+
+	this.waitDelay(function() {
+		ok( plugin.results.length === 0, "Results are not loaded" );
+		ok( plugin.$results.is(":hidden"), "List is hidden" );
+		start();
+	});
+});
+
+asyncTest( "Up arrow first time executes activate method", function() {
+	var plugin = this.plugin;
+	plugin.focusPrev = function() { ok( false, "focusPrev should not be executed" ) };
+	plugin.activate = function() { ok( true, "activate is executed" ) };
+	expect( 1 );
+	
+	Syn.click( {}, "test-input" ).type("[up]");
+	this.waitDelay(function() { start(); });	
+});
+
+asyncTest( "Down arrow first time executes activate method", function() {
+	var plugin = this.plugin;
+	plugin.focusNext = function() { ok( false, "focusNext should not be executed" ) };
+	plugin.activate = function() { ok( true, "activate is executed" ) };
+	expect( 1 );
+	
+	Syn.click( {}, "test-input" ).type("[down]");
+	this.waitDelay(function() { start(); });	
+});
+
+
+module( "Local data", {
+	setup: function() {
+		console.log("Local data.setup");
+		this.localData = [ "Acompleter", "Belsky", "Handmade", "Javascript", "QUnit", "JQuery", "May", "All", "Beings", "Be", "Happy" ];
+		this.$fixture = $("#qunit-fixture");
+		this.$el = this.$fixture.find("#test-input").acompleter({
+			data: this.localData,
+			minChars: 0
+		});
+		this.plugin = this.$el.data('plugin_acompleter');
+	},
+	teardown: function() {
+		console.log("Local data.teardown");
+		this.$fixture.find("input").acompleter("destroy");
 	}
 });
 
 
 asyncTest( "Loading of local data", function() {
 	var plugin = this.plugin;
-	plugin.options.data = this.localData;
-	plugin.options.minChars = 0;
 	expect( 1 );
 
 	Syn.click( {}, "test-input" ).type("A\b");
@@ -69,12 +160,5 @@ asyncTest( "Loading of local data", function() {
 		start();
 	}, plugin.options.delay + 100 );
 });
-
-
-
-
-
-
-
 
 

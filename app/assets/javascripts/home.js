@@ -1,4 +1,3 @@
-console.log('home loaded');
 $(document).ready(function() {
 	
 	
