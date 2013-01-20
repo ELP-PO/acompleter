@@ -90,3 +90,11 @@ test( "Plugin throws errors", function() {
 		"raised error then non-inptus"
 	);
 });
+
+test( "Plugin change autocomplete attribute and restore it after destroy", function() {
+    this.$el.attr( "autocomplete", "on" );
+    this.$el.acompleter();
+    equal( this.$el.attr("autocomplete"), "off", "autocomplete attribute is turned off" );
+    this.$el.acompleter("destroy");
+    equal( this.$el.attr("autocomplete"), "on", "autocomplete attribute is restored" );
+});

@@ -181,6 +181,7 @@
         this._keyTimeout = null;
         this._lastProcessedValue = undefined;
         this._ignoreBlur = false;
+        this._elAttrs = {};
         this.results = [];
         this.$results = null;
         this.$el = $el;
@@ -196,6 +197,9 @@
 
         this.$results = this.createList();
         $("body").append( this.$results );
+
+        this._elAttrs.autocomplete = this.$el.attr("autocomplete");
+        this.$el.attr( "autocomplete", "off" );
 
         this.$el.bind( "dblclick." + pluginName, function() {
             self.activate();
@@ -256,8 +260,11 @@
 
 
     $.Acompleter.prototype.destroy = function() {
-        this.$el.unbind( "." + pluginName );
         this.$results.remove();
+        for ( var attr in this._elAttrs ) {
+            this.$el.attr( attr, this._elAttrs[ attr ] );
+        }
+        this.$el.unbind( "." + pluginName );
         this.$el.removeData( "plugin_" + pluginName );
     }; // destroy
 
