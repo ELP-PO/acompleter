@@ -183,6 +183,7 @@
         this._lastProcessedValue = undefined;
         this._ignoreBlur = false;
         this._elAttrs = {};
+        this._processResults = $.noop;
         this.results = [];
         this.$results = null;
         this.$el = $el;
@@ -203,7 +204,7 @@
         this.$el.attr( "autocomplete", "off" );
 
         this.$el.bind( "dblclick." + pluginName, function() {
-            self.activate();
+            self.activateNow();
         });
         this.$el.bind( "blur." + pluginName, function(e) {
             if ( !self._ignoreBlur && !self.options._debug ) {
@@ -212,7 +213,6 @@
         });
 
         this.$el.bind( "keydown." + pluginName, function( e ) {
-            //console.log( 'keykode:' , e.keyCode );
             switch ( parseInt(e.keyCode) ) {
                 case 40: // down arrow
                     e.preventDefault();
@@ -326,7 +326,7 @@
      */
     $.Acompleter.prototype.fetchData = function( value ) {
         var self = this;
-        var processResults = function( results, filter ) {
+        this._processResults = function( results, filter ) {
             if ( $.isFunction( self.options.processData ) ) {
                 results = self.options.processData( results );
             }
@@ -336,12 +336,12 @@
         };
         this._lastProcessedValue = value;
         if ( value.length < this.options.minChars ) {
-            processResults( [], value );
+            this._processResults( [], value );
         } else if ( this.options.data ) {
-            processResults( this.options.data, value );
+            this._processResults( this.options.data, value );
         } else {
             this.fetchRemoteData( value, function( remoteData ) {
-                processResults( remoteData, value );
+                self._processResults( remoteData, value );
             });
         }
     };
@@ -498,7 +498,6 @@
      * or set to first item if current item is not found in reulsts
      */
     $.Acompleter.prototype.updateCurrent = function() {
-        //console.log("updateCurrent start");
         if ( this.results.length === 0 ) {
             return;
         }
@@ -518,7 +517,6 @@
         }
 
         this.setCurrent( index );
-        //console.log("updateCurrent end");
     }; // updateCurrent
 
 
@@ -526,10 +524,8 @@
      * Remember item in results[index] as current item
      */
     $.Acompleter.prototype.setCurrent = function( index ) {
-        //console.log("setCurrent start");
         this._current.index = index;
         this._current.valueToCompare = this.options.getComparableValue( this.results[ index ] );
-        //console.log("setCurrent end");
     }; // setCurrent
 
 
@@ -698,6 +694,7 @@
 
 
     $.Acompleter.prototype.deactivate = function( finish ) {
+        this._processResults = $.noop;
         if ( this._keyTimeout ) {
             clearTimeout( this._keyTimeout );
         }
