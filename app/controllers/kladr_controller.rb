@@ -2,22 +2,24 @@ class KladrController < ApplicationController
   def list
     if params[:code].nil? or params[:code].length == 0
       @items = get_states(params[:q])
-    elsif params[:code].length == 2 # state provided
-      @items = get_districts(params[:code], params[:q])
-    elsif params[:code].length == 5 # city provided
-      @items = get_cities(params[:code], params[:q])
+    elsif [ 2, # state provided
+            5, # district provided
+            8  # city provided
+            ].include?(params[:code].length) # state provided
+      @items = get_kladr(params[:code], params[:q])
+    elsif params[:code].length == 11
+      @items = get_streets(params[:code], params[:q])
     end
     
     respond_to do |format|
       format.html # list.html.erb
       format.json { render :json => @items }
-  #    format.json { render :json => params[:q] }
     end
   end
   
   def form
     respond_to do |format|
-      format.html # form.html.erb
+      format.html
     end
   end
   
@@ -29,18 +31,21 @@ class KladrController < ApplicationController
     return Kladr.where("code like '__00000000000' AND name like concat('%', concat(?, '%'))", q).order("name")
   end
   
-  def get_districts(code, q = "")
+  def get_kladr(code, q = "")
     if q.nil?
       q = ""
     end
-    return Kladr.where("code like concat(?, '___00000000') AND code <> concat(?, '00000000000') AND name like concat('%', concat(?, '%'))", code, code, q).order("name")
+    mask = (code + "___").ljust(13, "0")
+    exclude = code.ljust(13, "0")
+    return Kladr.where("code like ? AND code <> ? AND name like concat('%', concat(?, '%'))", mask, exclude, q).order("name")
   end
   
-  def get_cities(code, q = "")
+  def get_streets(code, q = "")
     if q.nil?
       q = ""
     end
-    return Kladr.where("code like concat(?, '___00000') AND code <> concat(?, '00000000000') AND name like concat('%', concat(?, '%'))", code, code, q).order("name")
+    mask = (code + "____").ljust(17, "0")
+    return Street.where("code like ? AND name like concat('%', concat(?, '%'))", mask, q).order("name")
   end
-
+  
 end

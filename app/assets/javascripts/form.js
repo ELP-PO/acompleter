@@ -23,6 +23,14 @@ $(document).ready(function() {
 	};
 	var updateAcompleter = function( $el, code ) {
 		$el.data("plugin_acompleter").options.url = "/kladr/list.json?code=" + code;
+		$el.data("plugin_acompleter").options.processData = function( loadedData ) {
+			var dummyItem = {
+				value: "<Не задан>",
+				data: { code: code + "000", socr: "" }
+			};
+			return [ dummyItem ].concat( processData(loadedData) );
+		};
+		
 		$el.removeAttr("disabled")
 			.removeClass("disabled")
 			.val("")
@@ -49,6 +57,16 @@ $(document).ready(function() {
 		updateAcompleter( $("#city"), code );
 	}
 	
+	$("#city").data("plugin_acompleter").options.onItemSelect = function( result, plugin ) {
+		var code = result.data.code.substr( 0, 8 );
+		updateAcompleter( $("#locality"), code );
+	}
+
+	$("#locality").data("plugin_acompleter").options.onItemSelect = function( result, plugin ) {
+		var code = result.data.code.substr( 0, 11 );
+		updateAcompleter( $("#street"), code );
+	}
+
 
 
 	
