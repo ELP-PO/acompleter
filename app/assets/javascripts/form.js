@@ -51,9 +51,9 @@ $(document).ready(function() {
 		}
 	}).focus();
 	
-	$("#district, #city, #locality, #street").attr( "disabled", "disabled" ).addClass("disabled").each(function() {
+	$("#district, #city, #locality, #street, #building").attr( "disabled", "disabled" ).addClass("disabled").each(function() {
 		initAcompleter( $(this) );
-	})
+	});
 	
 	$("#district").data("plugin_acompleter").options.onItemSelect = function( result, plugin ) {
 		var code = result.data.code.substr( 0, 5 );
@@ -68,9 +68,10 @@ $(document).ready(function() {
 	$("#locality").data("plugin_acompleter").options.onItemSelect = function( result, plugin ) {
 		var code = result.data.code.substr( 0, 11 );
 		updateAcompleter( $("#street"), code );
-	}
+	};
 
-
-
-	
+	$("#street").data("plugin_acompleter").options.onItemSelect = function( result, plugin ) {
+		var code = result.data.code.substr( 0, 15 );
+		updateAcompleter( $("#building"), code );
+	};
 });

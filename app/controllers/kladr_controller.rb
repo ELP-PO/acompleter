@@ -5,10 +5,12 @@ class KladrController < ApplicationController
     elsif [ 2, # state provided
             5, # district provided
             8  # city provided
-            ].include?(params[:code].length) # state provided
+            ].include?(params[:code].length)
       @items = get_kladr(params[:code], params[:q])
-    elsif params[:code].length == 11
+    elsif params[:code].length == 11 # locality provided
       @items = get_streets(params[:code], params[:q])
+    elsif params[:code].length == 15 # street provided
+      @items = get_buildings(params[:code], params[:q])
     end
     
     respond_to do |format|
@@ -46,6 +48,21 @@ class KladrController < ApplicationController
     end
     mask = (code + "____").ljust(17, "0")
     return Street.where("code like ? AND name like concat('%', concat(?, '%'))", mask, q).order("name")
+  end
+  
+  def get_buildings(code, q = "")
+    if q.nil?
+      q = ""
+    end
+    mask = code + "____"
+    buildings = Doma.where("code like ? AND name like concat('%', concat(?, '%'))", mask, q).order("code")
+    
+    buildings = buildings.map {|record|
+        record.name.split(",").map {|b| {:name => b, :code => record.code, :index => record.index, :socr => record.socr }}
+      }.flatten.sort_by {|b| b[:name].to_i }
+    
+    
+    return buildings
   end
   
 end

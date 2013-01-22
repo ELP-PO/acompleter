@@ -1,10 +1,10 @@
 #form input {
-	font-size: 40px;
+	font-size: 20px;
 	width: 800px;
 }
 
 #form label {
-	font-size: 30px;
+	font-size: 15px;
 }
 
 #form input.disabled {
