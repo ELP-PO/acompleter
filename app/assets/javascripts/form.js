@@ -1,5 +1,8 @@
 $(document).ready(function() {
 	
+	if ( $("#form").length == 0 ) return;
+	
+	
 	var processData = function( loadedData ) {
         return $.map( loadedData, function( result ) {
             return {
