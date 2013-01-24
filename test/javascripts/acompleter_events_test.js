@@ -1,6 +1,5 @@
 module( "Events", {
 	setup: function() {
-		console.log("Keyboard interaction.setup");
 		this.$fixture = $("#qunit-fixture");
 		this.$el = this.$fixture.find("#test-input").acompleter({ data: localData });
 		this.plugin = this.$el.data('plugin_acompleter');
@@ -17,7 +16,6 @@ module( "Events", {
         };
 	},
 	teardown: function() {
-		console.log("Keyboard interaction.teardown");
 		this.$fixture.find("input").acompleter("destroy");
 	}
 });

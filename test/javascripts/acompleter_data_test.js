@@ -56,6 +56,7 @@ module( "Remote data", {
                     };
                 });
             },
+            useCache: false,
 			minChars: 0
 		});
 		this.plugin = this.$el.data('plugin_acompleter');
@@ -79,3 +80,30 @@ asyncTest( "Remote data loaded and ready to parse", function() {
     expect( 1 );
     self.plugin.activate();
 });
+
+asyncTest( "Remote data stored in cache and reused from cache", function() {
+    var self = this,
+        plugin = self.plugin;
+    plugin.options.useCache = true;
+    plugin.activate();
+    self.waitDelay(function() {
+        deepEqual( plugin._cache, plugin.results, "all results stored in the cache" );
+        plugin.deactivate(true);
+        sinon.spy( $, "ajax" );
+        Syn.click( {}, plugin.$el ).type("Ады");
+        self.waitDelay(function() {
+            start();
+            equal( $.ajax.callCount, 0, "ajax has not called" );
+            deepEqual( plugin.results, [{
+                    "data": { "code": "0100000000000", "gninmb": "0100", "index": "385000", "ocatd": "79000000000", "socr": "Респ", "status": "0", "uno": "" },
+                    "value": "Адыгея"
+                }],
+                "results loaded propertly"
+            );
+        });
+    });
+});
+
+
+
+

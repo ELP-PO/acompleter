@@ -1,11 +1,9 @@
 module( "Setup", {
 	setup: function() {
-		console.log("Setup.setup");
 		this.$fixture = $("#qunit-fixture");
 		this.$el = this.$fixture.find("#test-input");
 	},
 	teardown: function() {
-		console.log("Setup.teardown");
 		this.$fixture.find("input").acompleter("destroy");
 	}
 });

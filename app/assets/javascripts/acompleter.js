@@ -34,6 +34,7 @@
             highlight: true,
             displayValue: null,
             selectOnTab: true,
+            useCache: true,
 
             //animationSpeed: 5000,
 
@@ -186,6 +187,8 @@
         this._ignoreBlur = false;
         this._elAttrs = {};
         this._processResults = $.noop;
+        this._cache = [];
+        this._cachedValue = "";
         this.results = [];
         this.$results = null;
         this.$el = $el;
@@ -329,6 +332,17 @@
         return value;
     };
 
+
+    $.Acompleter.prototype.match = function ( haystack, needle ) {
+        if ( !this.options.matchCase ) {
+            haystack = haystack.toLowerCase();
+            needle = needle.toLowerCase();
+        }
+        var index = haystack.indexOf( needle );
+        return index === 0 || ( this.options.matchInside && index > 0 );
+    };
+
+
     /**
      * Get autocomplete data for a given value
      * @param {string} value Value to base autocompletion on
@@ -337,9 +351,6 @@
     $.Acompleter.prototype.fetchData = function( value ) {
         var self = this;
         this._processResults = function( results, filter ) {
-            if ( $.isFunction( self.options.processData ) ) {
-                results = self.options.processData( results );
-            }
             self.results = self.filterResults( results, filter );
             self.updateCurrent();
             self.showResults();
@@ -364,10 +375,11 @@
         } else {
             var self = this;
             var ajaxCallback = function( data ) {
-                if ( data.length ) {
-                    self.parseRemoteData( data );
-                    self.cacheWrite( value, data );
+                data = self.parseRemoteData( data );
+                if ( $.isFunction( self.options.processData ) ) {
+                    data = self.options.processData( data );
                 }
+                self.cacheWrite( value, data );
                 self.$el.removeClass( self.options.loadingClass );
                 callback( data );
             };
@@ -397,6 +409,9 @@
     $.Acompleter.prototype.parseRemoteData = function( remoteData ) {
         var remoteDataType,
             data = remoteData;
+        if ( remoteData.length === 0 ) {
+            return remoteData;
+        }
         if ( this.options.remoteDataType === 'json' ) {
             remoteDataType = typeof( remoteData );
             switch ( remoteDataType ) {
@@ -430,17 +445,7 @@
         var pattern = this.matchStringConverter(filter);
         var testValue = this.matchStringConverter(result.value);
         */
-        if ( !this.options.matchCase ) {
-            pattern = pattern.toLowerCase();
-            testValue = testValue.toLowerCase();
-        }
-        var patternIndex = testValue.indexOf( pattern );
-        if ( this.options.matchInside ) {
-            return patternIndex > -1;
-        } else {
-            return patternIndex === 0;
-        }
-        return true;
+        return this.match( testValue, pattern );
     };
 
     /**
@@ -787,13 +792,27 @@
     }; // showList
 
 
-    $.Acompleter.prototype.cacheRead = function() { // function( value ) {
+    $.Acompleter.prototype.cacheRead = function( value ) {
+        var i,
+            cacheLength = this._cache.length,
+            results = [];
+        if ( this.options.useCache && cacheLength && this.match( value, this._cachedValue ) ) {
+            for ( i = 0; i < cacheLength; i++ ) {
+                if ( this.match( this._cache[ i ].value, value ) ) {
+                    results.push( this._cache[ i ] );
+                }
+            }
+            return results;
+        }
         return false;
     }; // cacheRead
 
 
-    $.Acompleter.prototype.cacheWrite = function() { //value, data) {
-        return false;
+    $.Acompleter.prototype.cacheWrite = function( value, data ) {
+        if ( this.options.useCache && data.length ) {
+            this._cachedValue = value;
+            this._cache = data;
+        }
     }; // cacheWrite
 
 
