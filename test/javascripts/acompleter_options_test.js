@@ -73,3 +73,23 @@ asyncTest( "displayValue", function() {
         });
     });
 });
+
+
+
+
+asyncTest( "selectOnTab", function() {
+	var plugin = this.plugin;
+
+    plugin.options.selectOnTab = true;
+
+    // activate list
+    Syn.click( {}, plugin.$el ).type("[down]");
+
+    this.waitDelay(function() {
+        // navigate to fifth item (Javascript) and select it by tab
+        Syn.type( "[down][down][down][down]\t", plugin.$el, function() {
+            start();
+            equal( plugin.$el.val(), "Javascript", "selected by tab" );
+        });
+    });
+});

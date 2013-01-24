@@ -33,6 +33,8 @@
             animationSpeed: 177,
             highlight: true,
             displayValue: null,
+            selectOnTab: true,
+
             //animationSpeed: 5000,
 
             /**
@@ -243,6 +245,14 @@
                         return false;
                     }
                     break;
+                case 9: // tab
+                    if (self._active && self.options.selectOnTab) {
+                        e.preventDefault();
+                        if (self._active) {
+                            self.selectCurrent();
+                        }
+                    }
+                    break;
                 /*
                  * Ignore navigational and special keys
                  */
@@ -250,7 +260,7 @@
                 case 35: case 36:            // home, end
                 case 91: case 93:            // left command, right command
                 case 16: case 17: case 18:   // shift, ctrl, alt
-                case 9:  case 20: case 45:   // tab, capslock, insert
+                case 20: case 45:   // capslock, insert
                     break;
 
                 default:
