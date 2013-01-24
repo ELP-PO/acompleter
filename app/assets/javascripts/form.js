@@ -74,4 +74,9 @@ $(document).ready(function() {
 		var code = result.data.code.substr( 0, 15 );
 		updateAcompleter( $("#building"), code );
 	};
+	$("#building").data("plugin_acompleter").options.onItemSelect = function( result, plugin ) {
+		$("#postalcode").val( result.data.index );
+	};
+	
+	
 });
