@@ -17,7 +17,6 @@
             resultsId: pluginName + "-results-", // + uid (plugin uid will append here)
             currentClass: "current",
             onError: undefined,
-            beforeUseConverter: null,
             listLength: 10,
             minChars: 0,
             matchInside: true,
@@ -314,23 +313,12 @@
      * Activate plugin immediately
      */
     $.Acompleter.prototype.activateNow = function() {
-        var value = this.beforeUseConverter( this.$el.val() );
+        var value = this.$el.val();
         if ( value !== this._lastProcessedValue ) {
             this.fetchData( value );
         }
     };
 
-    /**
-     * Convert string before use
-     * @param s
-     */
-    $.Acompleter.prototype.beforeUseConverter = function( value ) {
-        var converter = this.options.beforeUseConverter;
-        if ( $.isFunction(converter) ) {
-            value = converter( value );
-        }
-        return value;
-    };
 
 
     $.Acompleter.prototype.match = function ( haystack, needle ) {
