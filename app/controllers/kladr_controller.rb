@@ -23,8 +23,7 @@ class KladrController < ApplicationController
     respond_to do |format|
       format.html
     end
-  end
-  
+  end  
   
   def get_states(q = "")
     if q.nil?

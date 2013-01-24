@@ -9,7 +9,7 @@
         uuid = 0,
         defaults = {
             delay: 400, // specifies the amount of time to wait for displaying data between each key press
-            url: "/kladr/list.json",
+            //url: "/kladr/list.json",
             remoteDataType: "json",
             loadingClass: "loading",
             onItemSelect: null,

@@ -21,7 +21,8 @@ $(document).ready(function() {
 		$el.acompleter({
 				processData: processData,
 				showResult: showResult,
-				displayValue: displayValue
+				displayValue: displayValue,
+				useCache: true
 			})
 	};
 	var updateAcompleter = function( $el, code ) {
@@ -42,6 +43,7 @@ $(document).ready(function() {
 
 	$("#state").acompleter({
 		url: "/kladr/list.json",
+		useCache: true,
 		processData: processData,
 		showResult: showResult,
 		displayValue: displayValue,
