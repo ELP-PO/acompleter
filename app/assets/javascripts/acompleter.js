@@ -68,7 +68,7 @@
     var sanitizeResult = function( result ) {
         var value, data,
             type = typeof result;
-        if ( type === 'string' ) {
+        if ( type === 'string' || type === 'number' ) {
             value = result;
             data = {};
         } else if ( $.isArray( result ) ) {
