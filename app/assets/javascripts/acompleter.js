@@ -34,6 +34,9 @@
             displayValue: null,
             selectOnTab: true,
             useCache: true,
+            queryParamName: "q",
+            extraParams: {},
+            makeUrl: null,
 
             //animationSpeed: 5000,
 
@@ -374,7 +377,7 @@
 
             this.$el.addClass( this.options.loadingClass );
             $.ajax({
-                url: makeUrl( this.options.url, { q: value } ),
+                url: this.makeUrl( value ),
                 success: ajaxCallback,
                 error: function( jqXHR, textStatus, errorThrown ) {
                     if ( $.isFunction( self.options.onError ) ) {
@@ -388,6 +391,28 @@
         }
     }; // fetchRemoteData
 
+    /**
+     * Build the url for a remote request
+     * If options.queryParamName === false, append query to url instead of using a GET parameter
+     * @param {string} param The value parameter to pass to the backend
+     * @returns {string} The finished url with parameters
+     */
+    $.Acompleter.prototype.makeUrl = function( param ) {
+        var self = this,
+            url = this.options.url,
+            params = $.extend({}, this.options.extraParams);
+
+        if ( this.options.queryParamName === false ) {
+            url += encodeURIComponent(param);
+        } else {
+            params[ this.options.queryParamName ] = param;
+        }
+        if ( $.isFunction( this.options.makeUrl ) ) {
+            return this.options.makeUrl( url, params, makeUrl );
+        } else {
+            return makeUrl( url, params );
+        }
+    };
 
     /**
      * Parse data received from server
