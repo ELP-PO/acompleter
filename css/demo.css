@@ -41,7 +41,7 @@ td.docs {
     font-size: xx-large;
     float: left; }
   td.docs input.loading {
-    background-image: url(/images/spinner.gif); }
+    background-image: url(../images/spinner.gif); }
 
 td.docs:hover .anchor a {
   opacity: 1; }
