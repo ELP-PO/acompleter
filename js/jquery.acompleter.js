@@ -27,7 +27,7 @@
             lineSeparator: '\n',
             cellSeparator: '|',
             processData: null,
-            showResult: null,
+            buildListItem: null,
             animation: true,
             animationSpeed: 177,
             highlight: true,
@@ -82,9 +82,10 @@
             data = result.data;
         }
         value = String( value );
-        if ( typeof data !== 'object' ) {
-            data = {};
-        }
+        // WTF?
+        // if ( typeof data !== 'object' ) {
+        //     data = {};
+        // }
         return {
             value: value,
             data: data
@@ -172,8 +173,8 @@
          * Assert parameters
          */
         if (!$el || !($el instanceof $) || $el.length !== 1 || $el.get(0).tagName.toUpperCase() !== 'INPUT') {
-            $.error( "Invalid parameter for jquery." + pluginName
-                    + ", jQuery object with one element with INPUT tag expected.");
+            $.error( "Invalid parameter for jquery." + pluginName +
+                    ", jQuery object with one element with INPUT tag expected.");
         }
 
         this.uid = ++uuid;
@@ -747,12 +748,12 @@
        формирует содержимое тэга <li> в списке результатов
        может быть любым ХТМЛ
        */
-    $.Acompleter.prototype.showResult = function( value, result ) {
-        if ( $.isFunction(this.options.showResult) ) {
-            return this.options.showResult( value, result );
+    $.Acompleter.prototype.buildListItem = function( value, result ) {
+        if ( $.isFunction(this.options.buildListItem) ) {
+            return this.options.buildListItem( value, result );
         }
         return value;
-    }; // showResult
+    }; // buildListItem
 
     /* 
        выделяет query внутри value тэгами
@@ -763,11 +764,13 @@
             ( this.options.matchInside ? "" : "^" ) + query,
             ( this.options.matchCase ? "" : "i" )
         );
-        return value.replace( pattern, "<span class=\"hl\">$&</span>" );
+        return query.length ?
+            value.replace( pattern, "<span class=\"hl\">$&</span>" ) :
+            value;
     }; // defaultHighlight
 
     $.Acompleter.prototype.createListItem = function( index ) {
-        var $li, value,
+        var $li,
             self = this,
             result = this.results[ index ],
             value = result.value;
@@ -781,7 +784,7 @@
         }
 
         $li = $("<li></li>")
-            .html( this.showResult(value, result) )
+            .html( this.buildListItem(value, result) )
             .data( "valueToCompare", this.options.getComparableValue(result) )
             .data( "index", index );
         $li.click(function() { self.selectItem( $li ); })
