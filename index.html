@@ -124,9 +124,12 @@ $('#demo2 input').acompleter({
         return $.map( loadedData, function( result ) {
             return {
                 value: result.name,
-                data: result
+                data: result.population
             };
         });
+    },
+    buildListItem: function(value, result) {
+        return value + '&lt;span class="qty"&gt;' + result.data + "&lt;/span&gt;";
     }
 });
                     </code></pre>
@@ -149,11 +152,11 @@ $('#demo2 input').acompleter({
 $('#demo3 input').acompleter({
 	url: "data.json",
     buildListItem: function(value, result) {
-        return value + " — " + result.data + "";
+        return value + '<span class="qty">' + result.data + "</span>";
     },
     sortResults: true,
-    sortFunction: function(a, b, filter, opts) {
-        var parse = function(x) { return parseInt(x.data.replace(/\s/, ""), 10); };
+    sortFunction: function(a, b) {
+        var parse = function(x) { return parseInt(x.data.replace(/\s/g, ""), 10); };
         return parse(b) - parse(a);
     }
 });
