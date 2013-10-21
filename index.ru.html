@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="highlight.js/styles/solarized_light.css">
     </head>
 <body>
-    <div class="lang">Язык: <a href="index.ru.html">русский</a> | <a href="index.html">английский</a></div>
+    <div class="lang">Language: <a href="index.html">english</a> | <a href="index.ru.html">russian</a></div>
     <header>
         <h1>acompleter</h1>
         <h2>Animated jQuery Autocompletion Plugin</h2>
@@ -29,9 +29,9 @@
                             <a href="#intro-html">¶</a> 
                         </div>
                         <p>
-                        All the demos are use the same HTML: one text input.<br/>
-                        Note the <code>autocomplete="off"</code> attribute. If your input have a common name such as <code>name</code>,
-                        <code>city</code>, etc., then the browser most likely already has a stored values for these inputs.
+                        Во всех демо-примерах используется один и тот же HTML: один простой текстовый input.
+                        Обратите внимание на атрибут <code>autocomplete="off"</code>. Если ваш инпут имеет популярное название типа <code>name</code>,
+                        <code>city</code>, и т.д., то скорее всего браузер будет помнить ранее введённые значения для таких инпутов.
                         </p>
                     </div>
                 </td>
@@ -51,9 +51,9 @@
                         </div>
 
                         <p>
-                        By default plugin assumes that data stored in this format:
+                        По-умолчанию подразумевается что данные имеют формат:
                         <pre><code>[ { value: string, data: any_obj }, ... ]</code></pre>
-                        Here I use list of primates living on the Earch. The <code>value</code> is the primate name and the <code>data</code> is the amount.
+                        Я использую список живущих на Земле приматов в качестве <code>value</code> и их примерное количество в качестве <code>data</code>.
                         </p>
                     </div>
                 </td>
@@ -75,7 +75,7 @@
                             <a href="#intro-css">¶</a> 
                         </div>
                         <p>
-                        Without any styling the plugin is awful. So the minimum CSS is necessary.
+                        Совсем без стилей список выглядит ужасно, так что минимальный CSS необходим.
                         </p>
                     </div>
                 </td>
@@ -95,9 +95,8 @@
                         <div class="anchor">
                             <a href="#demo1">¶</a> 
                         </div>
-                        <p><strong>Demo #1</strong>. Minimum setup.<br/>
-                        The only requierd parameter is the <code>url</code> — path to the data.
-                        </p>
+                        <p><strong>Demo #1</strong>. Минимум настроек.<br/>
+                        Для работы плагину необходим url к файлу с данными.</p>
                         <input type="text" placeholder="type here..."/>
                     </div>
                 </td>
@@ -116,9 +115,8 @@ $('#demo1 input').acompleter({
                         <div class="anchor">
                             <a href="#demo2">¶</a> 
                         </div>
-                        <p><strong>Demo #2</strong>. Data in different format.<br/>
-                        To parse input data use the <code>processData</code> callback.
-                        </p>
+                        <p><strong>Demo #2</strong>. Данные в ином формате.<br/>
+                        Входные данные преобразует функция <code>processData</code>.</p>
                         <input type="text" placeholder="type here..."/>
                     </div>
                 </td>
@@ -148,8 +146,8 @@ $('#demo2 input').acompleter({
                         <div class="anchor">
                             <a href="#demo3">¶</a> 
                         </div>
-                        <p><strong>Demo #3</strong>. Sorting.<br/>
-                        <code>sortResult</code> turn sorting on/off. <code>sortFunction</code> set the sorter-funciton.</p>
+                        <p><strong>Demo #3</strong>. Сортировка.<br/>
+                        <code>sortResult</code> включает сортировку. <code>sortFunction</code> задаёт функцию сортировки.</p>
                         <input type="text" placeholder="type here..."/>
                     </div>
                 </td>
