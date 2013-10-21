@@ -1,7 +1,7 @@
 {
     "name": "acompleter",
-    "version": "0.1.0",
-    "title": "Yet another one jQuery Autocomplete Plugin",
+    "version": "0.1.1",
+    "title": "Animated jQuery Autocomplete Plugin",
     "author": {
         "name": "Ilyá Belsky",
         "url": "http://github.com/oluckyman"
@@ -15,7 +15,7 @@
     "dependencies": {
         "jquery": ">=1.9"
     },
-    "description": "Assisting the user with choosing a value from a list (either on server or on client) by showing available values based on keyboard input",
+    "description": "Assisting the user with choosing a value from a list (either on server or on client) by showing available values based on keyboard input. The list smoothly transforms when the user is typing.",
     "keywords": [
         "autocomplete",
         "autocompleter",
