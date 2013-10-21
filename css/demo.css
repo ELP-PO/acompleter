@@ -17,16 +17,18 @@ body {
 
 header {
   text-align: center;
-  background-color: #eee;
+  background-color: #e5e5ee;
   padding: 20px 0; }
   header h1 {
     font-size: 3em;
     font-variant: small-caps;
-    margin-bottom: .4em; }
+    margin-bottom: .4em;
+    text-shadow: 2px 2px 0 white; }
   header h2 {
     color: #777;
     padding-top: 0.0em;
-    font-size: 1.2em; }
+    font-size: 1.2em;
+    text-shadow: 0 1px 0 white; }
 
 table.content {
   width: 100%; }
