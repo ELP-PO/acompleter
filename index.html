@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="highlight.js/styles/solarized_light.css">
     </head>
 <body>
+    <a href="https://github.com/oluckyman/acompleter"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
     <div class="lang">Язык: <a href="index.ru.html">русский</a> | <a href="index.html">английский</a></div>
     <header>
         <h1>acompleter</h1>
@@ -95,7 +96,7 @@
                         <div class="anchor">
                             <a href="#demo1">¶</a> 
                         </div>
-                        <p><strong>Demo #1</strong>. Minimum setup.<br/>
+                        <p><strong>demo #1</strong>. Minimum setup.<br/>
                         The only requierd parameter is the <code>url</code> — path to the data.
                         </p>
                         <input type="text" placeholder="type here..."/>
@@ -116,7 +117,7 @@ $('#demo1 input').acompleter({
                         <div class="anchor">
                             <a href="#demo2">¶</a> 
                         </div>
-                        <p><strong>Demo #2</strong>. Data in the different format.<br/>
+                        <p><strong>demo #2</strong>. Data in the different format.<br/>
                         To parse input data use the <code>processData</code> callback.
                         </p>
                         <input type="text" placeholder="type here..."/>
@@ -148,7 +149,7 @@ $('#demo2 input').acompleter({
                         <div class="anchor">
                             <a href="#demo3">¶</a> 
                         </div>
-                        <p><strong>Demo #3</strong>. Sorting.<br/>
+                        <p><strong>demo #3</strong>. Sorting.<br/>
                         <code>sortResult</code> turn sorting on/off. <code>sortFunction</code> set the sorter-funciton.</p>
                         <input type="text" placeholder="type here..."/>
                     </div>
@@ -170,9 +171,141 @@ $('#demo3 input').acompleter({
                     </code></pre>
                 </td>
             </tr>
+            <tr id="settings">
+                <td class="docs">
+                    <div>
+                        <div class="anchor">
+                            <a href="#settings">¶</a> 
+                        </div>
+                        <p><strong>settings</strong><br/>
+                        <dl class="settings">
+                            <dt>delay</dt>
+                            <dd>400</dd>
+                            <dd>Specifies the amount of time to wait for displaying data between each keypress</dd>
+
+                            <dt>remoteDataType</dt>
+                            <dd>"json"</dd>
+                            <dd>The type of data that you're expecting back from the server. Now only "json" supported. Any other values mean that data is in the plain text format</dd>
+
+                            <dt>loadingClass</dt>
+                            <dd>"loading"</dd>
+                            <dd>The class name that will be added to the input when the data is loading</dd>
+
+                            <dt>onItemSelect</dt>
+                            <dd>null</dd>
+                            <dd>A function to be called when the item from the list is selected</dd>
+
+                            <dt>resultsClass</dt>
+                            <dd>"results"</dd>
+                            <dd>The class name for the dropdown box with the search results </dd>
+
+                            <dt>resultsId</dt>
+                            <dd>pluginName + "-results-" // + uid</dd>
+                            <dd>Specifies the prefix to the unique id for dropdown box</dd>
+
+                            <dt>currentClass</dt>
+                            <dd>"current"</dd>
+                            <dd>The class name for the selected list item</dd>
+
+                            <dt>onError</dt>
+                            <dd>null</dd>
+                            <dd>A function to be called if the request of the data fails</dd>
+
+                            <dt>listLength</dt>
+                            <dd>10</dd>
+                            <dd>The maximum number of list entries in the dropdown</dd>
+
+                            <dt>minChars</dt>
+                            <dd>0</dd>
+                            <dd>The minimum number of characters a user must type before a search is performed</dd>
+
+                            <dt>matchInside</dt>
+                            <dd>true</dd>
+                            <dd>Match the search query inside a words</dd>
+
+                            <dt>matchCase</dt>
+                            <dd>false</dd>
+                            <dd>Do a case-sensetive search or not</dd>
+
+                            <dt>filter</dt>
+                            <dd>null</dd>
+                            <dd>A function to be called to filter out local data. If <code>false</code> is specified then filtering is turned off</dd>
+
+                            <dt>sortResults</dt>
+                            <dd>false</dd>
+                            <dd>Turn sorting on or off</dd>
+
+                            <dt>sortFunction</dt>
+                            <dd>null</dd>
+                            <dd>A function to be called to sort items in the list</dd>
+
+                            <dt>lineSeparator</dt>
+                            <dd>'\n'</dd>
+                            <dd>Specifies a line separator in the plain text data (remoteDataType!=json)</dd>
+
+                            <dt>cellSeparator</dt>
+                            <dd>'|'</dd>
+                            <dd>Specifies a cell separator in the plain text data (remoteDataType!=json)</dd>
+
+                            <dt>processData</dt>
+                            <dd>null</dd>
+                            <dd>A function to be called when remote data is fetched and parsed</dd>
+
+                            <dt>buildListItem</dt>
+                            <dd>null</dd>
+                            <dd>A function to be called to build HTML for the list item</dd>
+
+                            <dt>animation</dt>
+                            <dd>true</dd>
+                            <dd>Turn animation on or off</dd>
+
+                            <dt>animationSpeed</dt>
+                            <dd>177</dd>
+                            <dd>Animation speed in the list morphings</dd>
+
+                            <dt>highlight</dt>
+                            <dd>true</dd>
+                            <dd>Highlight the search query inside list items. A function can be passed to generate specific HTML for query highlighting</dd>
+
+                            <dt>displayValue</dt>
+                            <dd>null</dd>
+                            <dd>A function to be called to insert value of the selected item into input field</dd>
+
+                            <dt>selectOnTab</dt>
+                            <dd>true</dd>
+                            <dd>Select highlighted item by Tab keystroke</dd>
+
+                            <dt>useCache</dt>
+                            <dd>true</dd>
+                            <dd>Cache remote data or not</dd>
+
+                            <dt>queryParamName</dt>
+                            <dd>"q"</dd>
+                            <dd>The name of the url parameter corresponding to search query. If <code>false</code> is specified then the searh query is append to the url</dd>
+
+                            <dt>extraParams</dt>
+                            <dd>{}</dd>
+                            <dd>Specifies the params what will be passed to the server</dd>
+
+                            <dt>makeUrl</dt>
+                            <dd>null</dd>
+                            <dd>A function to be called to generate url for the specific search query</dd>
+
+                            <dt>getComparableValue</dt>
+                            <dd>function( result ) { return result.value; }</dd>
+                            <dd>Returns value by which the plugin will compare result items with each other</dd>
+                        </dl>
+                    </div>
+                </td>
+                <td class="code">
+                </td>
+            </tr>
         </tbody>
     </table>
 
+    <footer>
+        contact: <a href="https://github.com/oluckyman/">oluckyman</a>
+    </footer>
     <script src="js/libs/jquery.min.js"></script>
     <script src="js/jquery.acompleter.js"></script>
     <script src="js/main.js"></script>

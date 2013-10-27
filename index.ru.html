@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="highlight.js/styles/solarized_light.css">
     </head>
 <body>
+    <a href="https://github.com/oluckyman/acompleter"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
     <div class="lang">Language: <a href="index.html">english</a> | <a href="index.ru.html">russian</a></div>
     <header>
         <h1>acompleter</h1>
@@ -166,6 +167,135 @@ $('#demo3 input').acompleter({
     }
 });
                     </code></pre>
+                </td>
+            </tr>
+            <tr id="settings">
+                <td class="docs">
+                    <div>
+                        <div class="anchor">
+                            <a href="#settings">¶</a> 
+                        </div>
+                        <p><strong>настройки</strong><br/>
+                        <dl class="settings">
+                            <dt>delay</dt>
+                            <dd>400</dd>
+                            <dd>Задержка после нажатия клавиши перед тем как начать поиск</dd>
+
+                            <dt>remoteDataType</dt>
+                            <dd>"json"</dd>
+                            <dd>Формат в котором сервер будет отдавать данные. Сейчас поддерживается только json. Любые другие форматы обрабатываются как текстовые данные</dd>
+
+                            <dt>loadingClass</dt>
+                            <dd>"loading"</dd>
+                            <dd>Название класса, который будет присвоен инпуту во время загрузки данных</dd>
+
+                            <dt>onItemSelect</dt>
+                            <dd>null</dd>
+                            <dd>Эта функция вызывается при выборе элемента из списка</dd>
+
+                            <dt>resultsClass</dt>
+                            <dd>"results"</dd>
+                            <dd>Название класса, который будет присвоен списку с результатами поиска</dd>
+
+                            <dt>resultsId</dt>
+                            <dd>pluginName + "-results-" // + uid</dd>
+                            <dd>Указывает префикс для id элемента, содежращего список с результатами поиска</dd>
+
+                            <dt>currentClass</dt>
+                            <dd>"current"</dd>
+                            <dd>Название класса, который будет присвоен выбранному элементу в списке</dd>
+
+                            <dt>onError</dt>
+                            <dd>null</dd>
+                            <dd>Эта функция вызывается при возникновении ошибки в процессе получения данных</dd>
+
+                            <dt>listLength</dt>
+                            <dd>10</dd>
+                            <dd>Количество элементов в списке</dd>
+
+                            <dt>minChars</dt>
+                            <dd>0</dd>
+                            <dd>Минимальное количество символов которое пользователь должен набрать, прежде чем начнётся поиск</dd>
+
+                            <dt>matchInside</dt>
+                            <dd>true</dd>
+                            <dd>Искать ли введённую подстроку внутри слов</dd>
+
+                            <dt>matchCase</dt>
+                            <dd>false</dd>
+                            <dd>Учитывать ли регистр при поиске</dd>
+
+                            <dt>filter</dt>
+                            <dd>null</dd>
+                            <dd>Эта функция вызывается для фильтрации локальных данных. Если указать значение <code>false</code>, то фильтрация происходить не будет</dd>
+
+                            <dt>sortResults</dt>
+                            <dd>false</dd>
+                            <dd>Сортировать ли результаты поиска</dd>
+
+                            <dt>sortFunction</dt>
+                            <dd>null</dd>
+                            <dd>Эта функция вызывается для сортировки результатов поиска</dd>
+
+                            <dt>lineSeparator</dt>
+                            <dd>'\n'</dd>
+                            <dd>Разделитель строк в текстовых данных (если тип данных отличный от json)</dd>
+
+                            <dt>cellSeparator</dt>
+                            <dd>'|'</dd>
+                            <dd>Разделитель колонок в текстовых данных (если тип данных отличный от json)</dd>
+
+                            <dt>processData</dt>
+                            <dd>null</dd>
+                            <dd>Эта функция вызывается после загрузки и парсинга данных</dd>
+
+                            <dt>buildListItem</dt>
+                            <dd>null</dd>
+                            <dd>Эта функция вызывается чтоб сформировать HTML для элемента списка</dd>
+
+                            <dt>animation</dt>
+                            <dd>true</dd>
+                            <dd>Включить ли анимацию</dd>
+
+                            <dt>animationSpeed</dt>
+                            <dd>177</dd>
+                            <dd>Скорость анимации при изменении списка</dd>
+
+                            <dt>highlight</dt>
+                            <dd>true</dd>
+                            <dd>Выделять ли найденную подстроку в результатах поиска. Может быть функцией, которая генерит HTML для элемента списка</dd>
+
+                            <dt>displayValue</dt>
+                            <dd>null</dd>
+                            <dd>Эта функция вызывается чтоб сформировать значение выбранного элемента которое будет вставлено в инпут</dd>
+
+                            <dt>selectOnTab</dt>
+                            <dd>true</dd>
+                            <dd>Выбирать ли элементы из списка клавишей Tab</dd>
+
+                            <dt>useCache</dt>
+                            <dd>true</dd>
+                            <dd>Использовать ли кеш</dd>
+
+                            <dt>queryParamName</dt>
+                            <dd>"q"</dd>
+                            <dd>Название параметра url, который будет использоваться для передачи поискового запроса. Если указано <code>false</code>, то поисковый запрос будет прибавлен в конец url</dd>
+
+                            <dt>extraParams</dt>
+                            <dd>{}</dd>
+                            <dd>Дополнительные параметры для передачи на url при поиске</dd>
+
+                            <dt>makeUrl</dt>
+                            <dd>null</dd>
+                            <dd>Эта функция вызывается для формирования url поискового запроса</dd>
+
+                            <dt>getComparableValue</dt>
+                            <dd>function( result ) { return result.value; }</dd>
+                            <dd>Эта функция возвращает значение по которому плагин может сравнивать элементы друг с другом</dd>
+                        </dl>
+                    </div>
+                </td>
+                <td class="code">
                 </td>
             </tr>
         </tbody>

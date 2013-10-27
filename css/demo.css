@@ -1,5 +1,5 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Mono);
-@import url(http://fonts.googleapis.com/css?family=Droid+Sans+Mono);
+@import url(http://fonts.googleapis.com/css?family=Inconsolata:400,700);
 html,
 body {
   padding: 0;
@@ -30,6 +30,32 @@ header {
     font-size: 1.2em;
     text-shadow: 0 1px 0 white; }
 
+footer {
+  text-align: center;
+  background-color: #e5e5ee;
+  padding: 20px 0; }
+
+dl.settings {
+  width: 100%;
+  overflow: hidden; }
+  dl.settings dt {
+    float: left;
+    clear: both;
+    font-family: "Inconsolata", sans-serif;
+    margin-right: 5px;
+    font-weight: bold; }
+    dl.settings dt:after {
+      content: ':'; }
+    dl.settings dt + dd {
+      clear: none;
+      font-family: "Inconsolata", sans-serif;
+      color: #777;
+      margin: 0; }
+  dl.settings dd {
+    float: left;
+    clear: both;
+    margin: 0 0 20px 50px; }
+
 table.content {
   width: 100%; }
   table.content tr {
@@ -49,7 +75,7 @@ td.docs {
     width: 550px; }
   td.docs strong {
     font-size: larger;
-    font-variant: small-caps; }
+    text-transform: uppercase; }
   td.docs .anchor {
     position: relative; }
     td.docs .anchor a {
@@ -73,14 +99,18 @@ td.docs:hover .anchor a {
   opacity: 1; }
 
 td.code {
-  font-size: 12px;
+  font-size: 1em;
   background-color: #fdf6e3;
   padding: 10px 0 100px 25px;
   vertical-align: top; }
   td.code pre {
     margin: 0 0 0 1px; }
-  td.code code {
-    font-family: "Droid Sans Mono", sans-serif; }
+
+code {
+  font-family: "Inconsolata", sans-serif;
+  font-size: 1em;
+  background-color: #fdf6e3;
+  padding: 2px; }
 
 .results {
   background: #eee; }

@@ -1,6 +1,6 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Mono);
-// @import url(http://fonts.googleapis.com/css?family=Inconsolata);
-@import url(http://fonts.googleapis.com/css?family=Droid+Sans+Mono);
+// @import url(http://fonts.googleapis.com/css?family=Droid+Sans+Mono);
+@import url(http://fonts.googleapis.com/css?family=Inconsolata:400,700);
 
 
 html,
@@ -37,7 +37,44 @@ header {
         font-size: 1.2em;
         text-shadow: 0 1px 0 white;
     }
+} 
+footer {
+    text-align: center;
+    background-color: #e5e5ee;
+    padding: 20px 0;
+} 
+
+dl.settings {
+    width:100%;
+    overflow:hidden;
+    dt {
+        float:left;
+        clear: both;
+        // font-family: 'Droid Sans Mono', sans-serif;
+        font-family: 'Inconsolata', sans-serif;
+        margin-right: 5px;
+        font-weight: bold;
+
+        &:after {
+            content: ':';
+        }
+
+        &+dd {
+            clear:none;
+            // font-family: 'Droid Sans Mono', sans-serif;
+            font-family: 'Inconsolata', sans-serif;
+            color: #777;
+            margin: 0;
+        }
+    }
+    dd {
+        float:left;
+        clear:both;
+        margin: 0 0 20px 50px;
+    }
+
 }
+
 
 table.content {
     width: 100%;
@@ -55,7 +92,8 @@ td.docs {
     }
     strong {
         font-size: larger;
-        font-variant: small-caps;
+        // font-variant: small-caps;
+        text-transform: uppercase;
     }
 
     width: 50%;
@@ -102,8 +140,9 @@ td.docs:hover .anchor a {
 }
 
 
+
 td.code {
-    font-size: 12px;
+    font-size: 1em;
     background-color: #fdf6e3;
     padding: 10px 0 100px 25px;
     vertical-align: top;
@@ -111,16 +150,19 @@ td.code {
     pre {
         margin: 0 0 0 1px;
     }
-    code {
-        // font-family: 'PT Mono', 'Inconsolata', sans-serif;
-        font-family: 'Droid Sans Mono', sans-serif;
-        
-    }
 }
 
 
 
 
+code {
+    // font-family: 'PT Mono', 'Inconsolata', sans-serif;
+    // font-family: 'Droid Sans Mono', sans-serif;
+    font-family: 'Inconsolata', sans-serif;
+    font-size: 1em;
+    background-color: #fdf6e3;
+    padding: 2px;
+}
 
 
 
